@@ -1,3 +1,0 @@
-C:/Users/Mayur/OneDrive/Desktop/CodeCrafterX21/RocketSimulator/build/CMakeFiles/RocketSimulator.dir
-C:/Users/Mayur/OneDrive/Desktop/CodeCrafterX21/RocketSimulator/build/CMakeFiles/edit_cache.dir
-C:/Users/Mayur/OneDrive/Desktop/CodeCrafterX21/RocketSimulator/build/CMakeFiles/rebuild_cache.dir
