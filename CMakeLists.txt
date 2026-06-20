@@ -8,4 +8,5 @@ include_directories(include)
 add_executable(RocketSimulator
     src/main.cpp
     src/Atmosphere.cpp
+    src/Vehicle.cpp
 )
