@@ -13,3 +13,4 @@ A physics-based rocket flight simulator written in C++.
 - Upgrade to RK4 numerical integration
 - Multi-phase flight handling (boost/coast/freefall)
 - Fault detection and trajectory optimization layers
+- Support for multiple propulsion types — rocket motors, jet engines, propeller-driven systems
