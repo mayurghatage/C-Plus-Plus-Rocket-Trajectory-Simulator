@@ -10,12 +10,10 @@ int main() {
     #endif
 
     std::cout << "================================================================" << std::endl;
-    std::cout << "   MISSION PLANNING & FAULT ANALYSIS GNC ENGINE // VERSION 26.1.0" << std::endl;
+    std::cout << "    ASTRA // C++ ROCKET TRAJECTORY SIMULATOR -- BUILD 0.2.0     " << std::endl;
     std::cout << "================================================================" << std::endl;
     std::cout << "              INITIALIZING SYSTEM SUBSYSTEMS..."                  << std::endl;
     std::cout << " ---------------------------------------------------------------" << std::endl;
-    std::cout << " [INFO] Core C++20 compile matrix verified configuration."        << std::endl;
-    std::cout << " [INFO] Memory allocations for internal state arrays initialized."<< std::endl;
     std::cout << " [INFO] Atmospheric profile module loaded. ISA 1976 active."      << std::endl;
     std::cout << " ---------------------------------------------------------------" << std::endl;
     std::cout << "================================================================" << std::endl;

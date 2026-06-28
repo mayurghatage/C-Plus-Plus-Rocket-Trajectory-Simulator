@@ -1,4 +1,5 @@
 #pragma once
+#include "Integrator.h"
 
 namespace RTS {
 
@@ -22,6 +23,8 @@ namespace RTS {
         double currentMass;
         double velocity;
         double altitude;
+
+        Derivative computeDerivative(const State& s, double airDensity) const;
 
         static constexpr double g0 = 9.80665;
     };

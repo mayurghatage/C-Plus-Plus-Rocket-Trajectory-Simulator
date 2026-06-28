@@ -8,6 +8,21 @@ namespace RTS {
         : dryMass(dryMass), propellantMass(propellantMass), thrust(thrust), isp(isp),
           currentMass(dryMass + propellantMass), velocity(0.0), altitude(0.0) {}
 
+    Derivative Vehicle::computeDerivative(const State& s, double airDensity) const {
+        bool burning = s.mass > dryMass;
+
+        const double dragCoeff = 0.5;
+        const double refArea   = 0.1;
+        double drag = 0.5 * airDensity * s.velocity * std::abs(s.velocity) * dragCoeff * refArea;
+        double weight       = s.mass * g0;
+        double netForce     = (burning ? thrust : 0.0) - drag - weight;
+        double acceleration = netForce / s.mass;
+
+        double massFlowRate = burning ? -(thrust / (isp * g0)) : 0.0;
+
+        return Derivative{s.velocity, acceleration, massFlowRate};
+    }
+
     void Vehicle::update(double dt, double airDensity) {
         bool burning = propellantMass > 0.0;
 
@@ -23,20 +38,29 @@ namespace RTS {
         double netForce = currentThrust - drag - weight;
         double acceleration = netForce / currentMass;
 
-        velocity += acceleration * dt;
-        altitude += velocity * dt;
+        // RK4 integration
+        State current{altitude, velocity, currentMass};
+        Derivative k1 = computeDerivative(current, airDensity);
+        
+        State s2{current.altitude + 0.5 * dt * k1.dAltitude,
+            current.velocity + 0.5 * dt * k1.dVelocity,
+            current.mass    + 0.5 * dt * k1.dMass};
+        Derivative k2 = computeDerivative(s2, airDensity);
+            
+        State s3{current.altitude + 0.5 * dt * k2.dAltitude,
+            current.velocity + 0.5 * dt * k2.dVelocity,
+            current.mass    + 0.5 * dt * k2.dMass};
+        Derivative k3 = computeDerivative(s3, airDensity);
+                
+        State s4{current.altitude + dt * k3.dAltitude,
+            current.velocity + dt * k3.dVelocity,
+            current.mass    + dt * k3.dMass};
+        Derivative k4 = computeDerivative(s4, airDensity);
+        
+        altitude    += (dt / 6.0) * (k1.dAltitude + 2*k2.dAltitude + 2*k3.dAltitude + k4.dAltitude);
+        velocity    += (dt / 6.0) * (k1.dVelocity + 2*k2.dVelocity + 2*k3.dVelocity + k4.dVelocity);
+        currentMass += (dt / 6.0) * (k1.dMass    + 2*k2.dMass     + 2*k3.dMass     + k4.dMass);
 
-        if (burning) {
-            double massFlowRate = thrust / (isp * g0);
-            double massBurned = massFlowRate * dt;
-
-            propellantMass -= massBurned;
-            if (propellantMass < 0.0) {
-                massBurned += propellantMass; // correct overshoot
-                propellantMass = 0.0;
-            }
-            currentMass -= massBurned;
-        }
     }
 
     double Vehicle::getMass() const { return currentMass; }

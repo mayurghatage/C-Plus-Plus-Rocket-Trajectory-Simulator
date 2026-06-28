@@ -1,13 +1,11 @@
-#ifndef AETHER_SIM_VECTOR3D_H
-#define AETHER_SIM_VECTOR3D_H
+#ifndef RTS_SIM_VECTOR3D_H
+#define RTS_SIM_VECTOR3D_H
 #include <cmath>
 
-namespace Aether {
+namespace RTS {
 
-/**
- * @brief Minimalist, independent 3D Vector structure to handle kinematic translations.
- * Requires absolutely zero external dependencies, making it safe to compile anywhere.
- */
+// 3D vector struct for kinematic calculations (position, velocity, force vectors)
+// No external dependencies — compiles anywhere
 struct Vector3D {
     double x = 0.0;
     double y = 0.0;
@@ -17,7 +15,7 @@ struct Vector3D {
     Vector3D() = default;
     Vector3D(double valX, double valY, double valZ) : x(valX), y(valY), z(valZ) {}
 
-    // Overloaded utility operator to allow rapid force vectors accumulation
+    // Operator overloads for vector math
     Vector3D operator+(const Vector3D& other) const {
         return Vector3D(x + other.x, y + other.y, z + other.z);
     }
@@ -48,6 +46,6 @@ struct Vector3D {
     }
 };
 
-} // namespace Aether
+} // namespace RTS
 
-#endif // AETHER_SIM_VECTOR3D_H
+#endif // RTS_SIM_VECTOR3D_H
