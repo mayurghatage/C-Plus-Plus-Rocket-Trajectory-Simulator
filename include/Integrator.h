@@ -17,4 +17,17 @@ namespace RTS {
         double dMass;      // mass flow rate (kg/s)
     };
 
+    // Tracks which phase of flight the vehicle is currently in
+    enum class FlightPhase {
+        PRE_LAUNCH,
+        BOOST,
+        MAX_Q,
+        BURNOUT,
+        COAST,
+        APOGEE,
+        DESCENT,
+        TERMINAL_VELOCITY,
+        LANDED
+    };
+
 }

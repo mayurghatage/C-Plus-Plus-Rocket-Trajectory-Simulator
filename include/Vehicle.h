@@ -14,6 +14,8 @@ namespace RTS {
         double getAltitude() const;
         bool isBurnout() const;
 
+        FlightPhase getPhase() const;
+
     private:
         double dryMass;
         double propellantMass;
@@ -27,6 +29,8 @@ namespace RTS {
         Derivative computeDerivative(const State& s, double airDensity) const;
 
         static constexpr double g0 = 9.80665;
+
+        FlightPhase currentPhase;
     };
 
 }

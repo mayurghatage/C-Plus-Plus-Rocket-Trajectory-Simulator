@@ -5,8 +5,9 @@
 namespace RTS {
 
     Vehicle::Vehicle(double dryMass, double propellantMass, double thrust, double isp)
-        : dryMass(dryMass), propellantMass(propellantMass), thrust(thrust), isp(isp),
-          currentMass(dryMass + propellantMass), velocity(0.0), altitude(0.0) {}
+    : dryMass(dryMass), propellantMass(propellantMass), thrust(thrust), isp(isp),
+      currentMass(dryMass + propellantMass), velocity(0.0), altitude(0.0),
+      currentPhase(FlightPhase::PRE_LAUNCH) {}
 
     Derivative Vehicle::computeDerivative(const State& s, double airDensity) const {
         bool burning = s.mass > dryMass;
@@ -61,11 +62,43 @@ namespace RTS {
         velocity    += (dt / 6.0) * (k1.dVelocity + 2*k2.dVelocity + 2*k3.dVelocity + k4.dVelocity);
         currentMass += (dt / 6.0) * (k1.dMass    + 2*k2.dMass     + 2*k3.dMass     + k4.dMass);
 
+        // Sync propellant mass from RK4 mass update
+        double massLost = (dryMass + propellantMass) - currentMass;
+        propellantMass = std::max(0.0, propellantMass - massLost);
+        if (currentMass < dryMass) currentMass = dryMass;
+
+        // Flight phase detection
+        double dynamicPressure = 0.5 * airDensity * velocity * velocity;
+
+        if (currentPhase == FlightPhase::PRE_LAUNCH && velocity > 0.0) {
+            currentPhase = FlightPhase::BOOST;
+        }
+        else if (currentPhase == FlightPhase::BOOST && dynamicPressure > 3000.0) {
+            currentPhase = FlightPhase::MAX_Q;
+        }
+        else if (currentPhase == FlightPhase::MAX_Q && isBurnout()) {
+            currentPhase = FlightPhase::BURNOUT;
+        }
+        else if (currentPhase == FlightPhase::BURNOUT && velocity > 0.0) {
+            currentPhase = FlightPhase::COAST;
+        }
+        else if (currentPhase == FlightPhase::COAST && velocity <= 0.0) {
+            currentPhase = FlightPhase::APOGEE;
+        }
+        else if (currentPhase == FlightPhase::APOGEE) {
+            currentPhase = FlightPhase::DESCENT;
+        }
+        else if (currentPhase == FlightPhase::DESCENT && 
+            std::abs(velocity) < 0.5 && altitude < 100.0) {
+            currentPhase = FlightPhase::LANDED;
+        }
+
     }
 
     double Vehicle::getMass() const { return currentMass; }
     double Vehicle::getVelocity() const { return velocity; }
     double Vehicle::getAltitude() const { return altitude; }
     bool Vehicle::isBurnout() const { return propellantMass <= 0.0; }
+    FlightPhase Vehicle::getPhase() const { return currentPhase; }
 
 }
