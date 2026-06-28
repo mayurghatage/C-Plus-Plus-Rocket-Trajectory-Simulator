@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "Atmosphere.h"
 #include "Vehicle.h"
 
@@ -53,10 +54,41 @@ int main() {
     double dt = 0.1;
     double simTime = 0.0;
 
+    // CSV telemetry export
+    std::ofstream telemetryFile("astra_telemetry.csv");
+    telemetryFile << "time,altitude,velocity,mass,phase\n";
+
+    // Mission summary tracking
+    double maxAltitude = 0.0;
+    double maxVelocity = 0.0;
+    double maxQ = 0.0;
+    double burnoutTime = 0.0;
+    double burnoutAltitude = 0.0;
+
     while (simTime < 600.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
         rocket.update(dt, props.density);
         simTime += dt;
+
+        // Write telemetry to CSV every frame
+        telemetryFile << simTime << ","
+                    << rocket.getAltitude() << ","
+                    << rocket.getVelocity() << ","
+                    << rocket.getMass() << ","
+                    << phaseToString(rocket.getPhase()) << "\n";
+
+        // Track mission statistics
+        if (rocket.getAltitude() > maxAltitude) maxAltitude = rocket.getAltitude();
+        if (std::abs(rocket.getVelocity()) > maxVelocity) maxVelocity = std::abs(rocket.getVelocity());
+
+        double airDensityNow = props.density;
+        double q = 0.5 * airDensityNow * rocket.getVelocity() * rocket.getVelocity();
+        if (q > maxQ) maxQ = q;
+
+        if (rocket.getPhase() == RTS::FlightPhase::BURNOUT && burnoutTime == 0.0) {
+            burnoutTime = simTime;
+            burnoutAltitude = rocket.getAltitude();
+        }
 
         if (rocket.getAltitude() <= 0.0 && rocket.getPhase() == RTS::FlightPhase::DESCENT) {
             std::cout << "[MISSION COMPLETE] Vehicle impacted ground at t=" << simTime << "s" << std::endl;
@@ -75,6 +107,20 @@ int main() {
             break;
         }
     }
+    // Close CSV file
+    telemetryFile.close();
+
+    // Mission summary
+    std::cout << "\n================================================================" << std::endl;
+    std::cout << "                    MISSION SUMMARY                               " << std::endl;
+    std::cout << "==================================================================" << std::endl;
+    std::cout << " Max Altitude    : " << maxAltitude    << " m"                      << std::endl;
+    std::cout << " Max Velocity    : " << maxVelocity    << " m/s"                    << std::endl;
+    std::cout << " Max-Q           : " << maxQ           << " Pa"                     << std::endl;
+    std::cout << " Burnout Time    : " << burnoutTime    << " s"                      << std::endl;
+    std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
+    std::cout << " Total Flight    : " << simTime        << " s"                      << std::endl;
+    std::cout << "==================================================================" << std::endl;
 
     return 0;
 }
