@@ -60,6 +60,10 @@ namespace RTS {
         // Ideal gas law for density
         result.density = result.pressure / (R_AIR * result.temperature);
 
+        // Speed of sound
+        const double GAMMA = 1.4;
+        result.speedOfSound = std::sqrt(GAMMA * R_AIR * result.temperature);
+
         return result;
     }
 

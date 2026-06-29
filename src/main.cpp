@@ -67,7 +67,7 @@ int main() {
 
     while (simTime < 600.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
-        rocket.update(dt, props.density);
+        rocket.update(dt, props.density, props.speedOfSound);
         simTime += dt;
 
         // Write telemetry to CSV every frame

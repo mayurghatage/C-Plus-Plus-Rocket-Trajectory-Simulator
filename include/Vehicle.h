@@ -1,5 +1,6 @@
 #pragma once
 #include "Integrator.h"
+#include "DragModel.h"
 
 namespace RTS {
 
@@ -7,7 +8,7 @@ namespace RTS {
     public:
         Vehicle(double dryMass, double propellantMass, double thrust, double isp);
 
-        void update(double dt, double airDensity);
+        void update(double dt, double airDensity, double speedOfSound);
 
         double getMass() const;
         double getVelocity() const;
@@ -26,7 +27,9 @@ namespace RTS {
         double velocity;
         double altitude;
 
-        Derivative computeDerivative(const State& s, double airDensity) const;
+        DragModel dragModel;
+
+        Derivative computeDerivative(const State& s, double airDensity, double speedOfSound) const;
 
         static constexpr double g0 = 9.80665;
 
