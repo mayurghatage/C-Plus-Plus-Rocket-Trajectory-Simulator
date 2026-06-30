@@ -1,0 +1,7 @@
+{
+  "dryMass": 0.0,
+  "propellantMass": 0.0,
+  "thrust": 0.0,
+  "isp": 0.0,
+  "_comment": "Fill in your own rocket's specs here"
+}
