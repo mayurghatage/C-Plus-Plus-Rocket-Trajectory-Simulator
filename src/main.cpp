@@ -3,6 +3,7 @@
 #include <fstream>
 #include "Atmosphere.h"
 #include "Vehicle.h"
+#include "ConfigLoader.h"
 
 std::string phaseToString(RTS::FlightPhase phase) {
     switch (phase) {
@@ -50,7 +51,14 @@ int main() {
 
     std::cout << "\n--- VEHICLE MODULE TEST ---" << std::endl;
 
-    RTS::Vehicle rocket(500.0, 1000.0, 15000.0, 250.0); // dryMass, propMass, thrust, Isp
+    VehicleConfig cfg;
+    try {
+        cfg = loadVehicleConfig("configs/falcon9.json");
+    } catch (const std::exception& e) {
+        std::cerr << "Config load failed: " << e.what() << std::endl;
+        return 1;
+    }
+    RTS::Vehicle rocket(cfg.dryMass, cfg.propellantMass, cfg.thrust, cfg.isp);
     double dt = 0.1;
     double simTime = 0.0;
 
