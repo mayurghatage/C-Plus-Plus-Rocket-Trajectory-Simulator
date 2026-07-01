@@ -6,59 +6,70 @@ namespace RTS {
 
     Vehicle::Vehicle(double dryMass, double propellantMass, double thrust, double isp)
     : dryMass(dryMass), propellantMass(propellantMass), thrust(thrust), isp(isp),
-      currentMass(dryMass + propellantMass), velocity(0.0), altitude(0.0),
-      currentPhase(FlightPhase::PRE_LAUNCH) {}
+    currentMass(dryMass + propellantMass),
+    positionX(0.0), positionZ(0.0), velocityX(0.0), velocityZ(0.0),
+    currentPhase(FlightPhase::PRE_LAUNCH) {}
 
     Derivative Vehicle::computeDerivative(const State& s, double airDensity, double speedOfSound) const {
         bool burning = s.mass > dryMass;
 
         const double refArea = 0.1;
-        double cd   = dragModel.getCd(s.velocity, speedOfSound);
-        double drag = 0.5 * airDensity * s.velocity * std::abs(s.velocity) * cd * refArea;
 
-        double weight       = s.mass * g0;
-        double netForce     = (burning ? thrust : 0.0) - drag - weight;
-        double acceleration = netForce / s.mass;
+        double pitchAngle = 0.0;
+        if (s.z > 50.0 && burning) {
+            pitchAngle = 5.0 * M_PI / 180.0;
+        }
+
+        double thrustX = burning ? thrust * std::sin(pitchAngle) : 0.0;
+        double thrustZ = burning ? thrust * std::cos(pitchAngle) : 0.0;
+
+        double speed = std::sqrt(s.vx*s.vx + s.vz*s.vz);
+        double cd = dragModel.getCd(speed, speedOfSound);
+        double dragForce = 0.5 * airDensity * speed * speed * cd * refArea;
+        double dragX = (speed > 0) ? dragForce * (s.vx / speed) : 0.0;
+        double dragZ = (speed > 0) ? dragForce * (s.vz / speed) : 0.0;
+
+        double accX = (thrustX - dragX) / s.mass;
+        double accZ = (thrustZ - dragZ - s.mass * g0) / s.mass;
 
         double massFlowRate = burning ? -(thrust / (isp * g0)) : 0.0;
 
-        return Derivative{s.velocity, acceleration, massFlowRate};
+        return Derivative{s.vx, s.vz, accX, accZ, massFlowRate};
     }
 
     void Vehicle::update(double dt, double airDensity, double speedOfSound) {
 
-        // RK4 integration
-        State current{altitude, velocity, currentMass};
+        State current{positionX, positionZ, velocityX, velocityZ, currentMass};
         Derivative k1 = computeDerivative(current, airDensity, speedOfSound);
-        
-        State s2{current.altitude + 0.5 * dt * k1.dAltitude,
-                 current.velocity + 0.5 * dt * k1.dVelocity,
-                 current.mass     + 0.5 * dt * k1.dMass};
-        Derivative k2 = computeDerivative(s2, airDensity, speedOfSound);
-            
-        State s3{current.altitude + 0.5 * dt * k2.dAltitude,
-                 current.velocity + 0.5 * dt * k2.dVelocity,
-                 current.mass     + 0.5 * dt * k2.dMass};
-        Derivative k3 = computeDerivative(s3, airDensity, speedOfSound);
-                
-        State s4{current.altitude + dt * k3.dAltitude,
-                 current.velocity + dt * k3.dVelocity,
-                 current.mass     + dt * k3.dMass};
-        Derivative k4 = computeDerivative(s4, airDensity, speedOfSound);
-        
-        altitude    += (dt / 6.0) * (k1.dAltitude + 2*k2.dAltitude + 2*k3.dAltitude + k4.dAltitude);
-        velocity    += (dt / 6.0) * (k1.dVelocity + 2*k2.dVelocity + 2*k3.dVelocity + k4.dVelocity);
-        currentMass += (dt / 6.0) * (k1.dMass     + 2*k2.dMass     + 2*k3.dMass     + k4.dMass);
 
-        // Sync propellant mass from RK4 mass update
+        State s2{current.x + 0.5*dt*k1.dx, current.z + 0.5*dt*k1.dz,
+                 current.vx + 0.5*dt*k1.dvx, current.vz + 0.5*dt*k1.dvz,
+                 current.mass + 0.5*dt*k1.dMass};
+        Derivative k2 = computeDerivative(s2, airDensity, speedOfSound);
+
+        State s3{current.x + 0.5*dt*k2.dx, current.z + 0.5*dt*k2.dz,
+                 current.vx + 0.5*dt*k2.dvx, current.vz + 0.5*dt*k2.dvz,
+                 current.mass + 0.5*dt*k2.dMass};
+        Derivative k3 = computeDerivative(s3, airDensity, speedOfSound);
+
+        State s4{current.x + dt*k3.dx, current.z + dt*k3.dz,
+                 current.vx + dt*k3.dvx, current.vz + dt*k3.dvz,
+                 current.mass + dt*k3.dMass};
+        Derivative k4 = computeDerivative(s4, airDensity, speedOfSound);
+
+        positionX += (dt/6.0)*(k1.dx + 2*k2.dx + 2*k3.dx + k4.dx);
+        positionZ += (dt/6.0)*(k1.dz + 2*k2.dz + 2*k3.dz + k4.dz);
+        velocityX += (dt/6.0)*(k1.dvx + 2*k2.dvx + 2*k3.dvx + k4.dvx);
+        velocityZ += (dt/6.0)*(k1.dvz + 2*k2.dvz + 2*k3.dvz + k4.dvz);
+        currentMass += (dt/6.0)*(k1.dMass + 2*k2.dMass + 2*k3.dMass + k4.dMass);
+
         double massLost = (dryMass + propellantMass) - currentMass;
         propellantMass = std::max(0.0, propellantMass - massLost);
         if (currentMass < dryMass) currentMass = dryMass;
 
-        // Flight phase detection
-        double dynamicPressure = 0.5 * airDensity * velocity * velocity;
+        double dynamicPressure = 0.5 * airDensity * velocityZ * velocityZ;
 
-        if (currentPhase == FlightPhase::PRE_LAUNCH && velocity > 0.0) {
+        if (currentPhase == FlightPhase::PRE_LAUNCH && velocityZ > 0.0) {
             currentPhase = FlightPhase::BOOST;
         }
         else if (currentPhase == FlightPhase::BOOST && dynamicPressure > 3000.0) {
@@ -67,27 +78,28 @@ namespace RTS {
         else if (currentPhase == FlightPhase::MAX_Q && isBurnout()) {
             currentPhase = FlightPhase::BURNOUT;
         }
-        else if (currentPhase == FlightPhase::BURNOUT && velocity > 0.0) {
+        else if (currentPhase == FlightPhase::BURNOUT && velocityZ > 0.0) {
             currentPhase = FlightPhase::COAST;
         }
-        else if (currentPhase == FlightPhase::COAST && velocity <= 0.0) {
+        else if (currentPhase == FlightPhase::COAST && velocityZ <= 0.0) {
             currentPhase = FlightPhase::APOGEE;
         }
         else if (currentPhase == FlightPhase::APOGEE) {
             currentPhase = FlightPhase::DESCENT;
         }
-        else if (currentPhase == FlightPhase::DESCENT && altitude <= 0.0) {
+        else if (currentPhase == FlightPhase::DESCENT && positionZ <= 0.0) {
             currentPhase = FlightPhase::LANDED;
-            altitude = 0.0;
-            velocity = 0.0;
+            positionZ = 0.0;
+            velocityZ = 0.0;
         }
 
         if (currentPhase == FlightPhase::LANDED) return;
     }
 
     double Vehicle::getMass() const { return currentMass; }
-    double Vehicle::getVelocity() const { return velocity; }
-    double Vehicle::getAltitude() const { return altitude; }
+    double Vehicle::getVelocity() const { return std::sqrt(velocityX*velocityX + velocityZ*velocityZ); }
+    double Vehicle::getAltitude() const { return positionZ; }
+    double Vehicle::getPositionX() const { return positionX; }
     bool Vehicle::isBurnout() const { return propellantMass <= 0.0; }
     FlightPhase Vehicle::getPhase() const { return currentPhase; }
 

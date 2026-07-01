@@ -13,6 +13,7 @@ namespace RTS {
         double getMass() const;
         double getVelocity() const;
         double getAltitude() const;
+        double getPositionX() const;
         bool isBurnout() const;
 
         FlightPhase getPhase() const;
@@ -24,8 +25,8 @@ namespace RTS {
         double isp;
 
         double currentMass;
-        double velocity;
-        double altitude;
+        double positionX, positionZ;
+        double velocityX, velocityZ;
 
         DragModel dragModel;
 

@@ -64,7 +64,7 @@ int main() {
 
     // CSV telemetry export
     std::ofstream telemetryFile("astra_telemetry.csv");
-    telemetryFile << "time,altitude,velocity,mach,mass,phase\n";
+    telemetryFile << "time,x,altitude,velocity,mach,mass,phase\n";
 
     // Mission summary tracking
     double maxAltitude = 0.0;
@@ -82,11 +82,12 @@ int main() {
 
         // Write telemetry to CSV every frame
         telemetryFile << simTime << ","
-                    << rocket.getAltitude() << ","
-                    << rocket.getVelocity() << ","
-                    << mach << ","
-                    << rocket.getMass() << ","
-                    << phaseToString(rocket.getPhase()) << "\n";
+                << rocket.getPositionX() << ","
+                << rocket.getAltitude() << ","
+                << rocket.getVelocity() << ","
+                << mach << ","
+                << rocket.getMass() << ","
+                << phaseToString(rocket.getPhase()) << "\n";
 
         // Track mission statistics
         if (rocket.getAltitude() > maxAltitude) maxAltitude = rocket.getAltitude();

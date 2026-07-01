@@ -2,19 +2,16 @@
 
 namespace RTS {
 
-    // Holds the full flight state at any point in time
     struct State {
-        double altitude;  // meters
-        double velocity;  // m/s
-        double mass;      // kg
+    double x, z;       // position (m) - x horizontal, z vertical
+    double vx, vz;      // velocity (m/s)
+    double mass;        // kg
     };
 
-    // Derivative struct — rates of change of the state
-    // Used by RK4 to sample slopes at intermediate points
     struct Derivative {
-        double dAltitude;  // velocity (m/s)
-        double dVelocity;  // acceleration (m/s^2)
-        double dMass;      // mass flow rate (kg/s)
+        double dx, dz;       // = vx, vz
+        double dvx, dvz;     // acceleration components
+        double dMass;
     };
 
     // Tracks which phase of flight the vehicle is currently in
