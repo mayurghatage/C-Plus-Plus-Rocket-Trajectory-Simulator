@@ -20,7 +20,7 @@ std::string phaseToString(RTS::FlightPhase phase) {
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     #ifdef _Win32
         std::system("cls");
     #else
@@ -52,8 +52,9 @@ int main() {
     std::cout << "\n--- VEHICLE MODULE TEST ---" << std::endl;
 
     VehicleConfig cfg;
+    std::string configPath = (argc > 1) ? argv[1] : "configs/falcon9.json";
     try {
-        cfg = loadVehicleConfig("configs/falcon9.json");
+        cfg = loadVehicleConfig(configPath);
     } catch (const std::exception& e) {
         std::cerr << "Config load failed: " << e.what() << std::endl;
         return 1;

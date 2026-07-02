@@ -1,6 +1,6 @@
 {
-  "dryMass": 500.0,
-  "propellantMass": 1000.0,
-  "thrust": 15000.0,
-  "isp": 250.0
+  "dryMass": 31100,
+  "propellantMass": 395700,
+  "thrust": 7607000,
+  "isp": 282
 }
