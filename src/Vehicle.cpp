@@ -74,7 +74,8 @@ namespace RTS {
         propellantMass = std::max(0.0, propellantMass - massLost);
         if (currentMass < dryMass) currentMass = dryMass;
 
-        double dynamicPressure = 0.5 * airDensity * velocityZ * velocityZ;
+        double speed = std::sqrt(velocityX*velocityX + velocityY*velocityY + velocityZ*velocityZ);
+        double dynamicPressure = 0.5 * airDensity * speed * speed;
 
         if (currentPhase == FlightPhase::PRE_LAUNCH && velocityZ > 0.0) {
             currentPhase = FlightPhase::BOOST;

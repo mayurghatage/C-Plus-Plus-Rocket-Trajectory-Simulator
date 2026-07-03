@@ -3,15 +3,15 @@
 namespace RTS {
 
     struct State {
-    double x, y, z;       // position (m) - x downrange, y lateral, z vertical
-    double vx, vy, vz;      // velocity (m/s)
-    double mass;        // kg
+    double x = 0, y = 0, z = 0;
+    double vx = 0, vy = 0, vz = 0;
+    double mass = 0;
     };
 
     struct Derivative {
-        double dx, dy, dz;       // = vx, vy, vz
-        double dvx, dvy, dvz;     // acceleration components
-        double dMass;
+        double dx = 0, dy = 0, dz = 0;
+        double dvx = 0, dvy = 0, dvz = 0;
+        double dMass = 0;
     };
 
     enum class FlightPhase {
