@@ -12,7 +12,7 @@ namespace RTS {
         double altitudeMeters = (EARTH_RADIUS * geometricAltitudeMeters) / (EARTH_RADIUS + geometricAltitudeMeters);
         
         // ISA 1976 layer data: {base altitude in meters, base temperature in Kelvin, lapse rate in K/m}
-        const double layers[8][3] = {
+        static constexpr double layers[8][3] = {
             {0.0,     288.15,  -0.0065},  // Troposphere
             {11000.0, 216.65,   0.0},     // Lower Stratosphere (isothermal)
             {20000.0, 216.65,   0.001},   // Upper Stratosphere
@@ -24,7 +24,7 @@ namespace RTS {
         };
 
         // Base pressure at bottom of each layer in Pascals
-        const double basePressure[8] = {
+        static constexpr double basePressure[8] = {
             101325.0, // sea level pressure (1 atm)
             22632.1,
             5474.89,
