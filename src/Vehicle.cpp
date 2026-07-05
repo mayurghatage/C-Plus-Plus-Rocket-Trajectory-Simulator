@@ -15,11 +15,12 @@ namespace RTS {
         const Stage& stage = stages[currentStageIndex];
         bool burning = s.mass > stage.dryMass;
 
-        const double refArea = 0.1;
+        const double refArea = 10.8;
 
         double pitchAngle = 0.0;
         if (s.z > 50.0 && burning) {
-            pitchAngle = 5.0 * M_PI / 180.0;
+            double turnProgress = std::min((s.z - 50.0) / 120000.0, 1.0);
+            pitchAngle = turnProgress * 85.0 * M_PI / 180.0;
         }
         double yawAngle = 0.0;
 
