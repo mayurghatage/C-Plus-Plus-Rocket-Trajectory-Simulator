@@ -18,6 +18,7 @@ namespace RTS {
         PRE_LAUNCH,
         BOOST,
         MAX_Q,
+        STAGE_SEPARATION,
         BURNOUT,
         COAST,
         APOGEE,

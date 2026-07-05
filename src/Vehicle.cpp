@@ -4,15 +4,16 @@
 
 namespace RTS {
 
-    Vehicle::Vehicle(double dryMass, double propellantMass, double thrust, double isp)
-    : dryMass(dryMass), propellantMass(propellantMass), thrust(thrust), isp(isp),
-    currentMass(dryMass + propellantMass),
+    Vehicle::Vehicle(std::vector<Stage> stages)
+    : stages(std::move(stages)), currentStageIndex(0),
+    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
     currentPhase(FlightPhase::PRE_LAUNCH) {}
 
     Derivative Vehicle::computeDerivative(const State& s, double airDensity, double speedOfSound) const {
-        bool burning = s.mass > dryMass;
+        const Stage& stage = stages[currentStageIndex];
+        bool burning = s.mass > stage.dryMass;
 
         const double refArea = 0.1;
 
@@ -20,11 +21,11 @@ namespace RTS {
         if (s.z > 50.0 && burning) {
             pitchAngle = 5.0 * M_PI / 180.0;
         }
-        double yawAngle = 0.0; // no lateral drift yet — wind model comes later
+        double yawAngle = 0.0;
 
-        double thrustX = burning ? thrust * std::sin(pitchAngle) * std::cos(yawAngle) : 0.0;
-        double thrustY = burning ? thrust * std::sin(pitchAngle) * std::sin(yawAngle) : 0.0;
-        double thrustZ = burning ? thrust * std::cos(pitchAngle) : 0.0;
+        double thrustX = burning ? stage.thrust * std::sin(pitchAngle) * std::cos(yawAngle) : 0.0;
+        double thrustY = burning ? stage.thrust * std::sin(pitchAngle) * std::sin(yawAngle) : 0.0;
+        double thrustZ = burning ? stage.thrust * std::cos(pitchAngle) : 0.0;
 
         double speed = std::sqrt(s.vx*s.vx + s.vy*s.vy + s.vz*s.vz);
         double cd = dragModel.getCd(speed, speedOfSound);
@@ -37,7 +38,7 @@ namespace RTS {
         double accY = (thrustY - dragY) / s.mass;
         double accZ = (thrustZ - dragZ - s.mass * g0) / s.mass;
 
-        double massFlowRate = burning ? -(thrust / (isp * g0)) : 0.0;
+        double massFlowRate = burning ? -(stage.thrust / (stage.isp * g0)) : 0.0;
 
         return Derivative{s.vx, s.vy, s.vz, accX, accY, accZ, massFlowRate};
     }
@@ -70,9 +71,9 @@ namespace RTS {
         velocityZ += (dt/6.0)*(k1.dvz + 2*k2.dvz + 2*k3.dvz + k4.dvz);
         currentMass += (dt/6.0)*(k1.dMass + 2*k2.dMass + 2*k3.dMass + k4.dMass);
 
-        double massLost = (dryMass + propellantMass) - currentMass;
-        propellantMass = std::max(0.0, propellantMass - massLost);
-        if (currentMass < dryMass) currentMass = dryMass;
+        double massLost = (stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass) - currentMass;
+        stages[currentStageIndex].propellantMass = std::max(0.0, stages[currentStageIndex].propellantMass - massLost);
+        if (currentMass < stages[currentStageIndex].dryMass) currentMass = stages[currentStageIndex].dryMass;
 
         double speed = std::sqrt(velocityX*velocityX + velocityY*velocityY + velocityZ*velocityZ);
         double dynamicPressure = 0.5 * airDensity * speed * speed;
@@ -83,8 +84,16 @@ namespace RTS {
         else if (currentPhase == FlightPhase::BOOST && dynamicPressure > 3000.0) {
             currentPhase = FlightPhase::MAX_Q;
         }
-        else if (currentPhase == FlightPhase::MAX_Q && isBurnout()) {
-            currentPhase = FlightPhase::BURNOUT;
+        else if ((currentPhase == FlightPhase::BOOST || currentPhase == FlightPhase::MAX_Q) && isBurnout()) {
+            if (currentStageIndex + 1 < static_cast<int>(stages.size())) {
+                currentPhase = FlightPhase::STAGE_SEPARATION;
+                currentMass -= stages[currentStageIndex].dryMass;
+                currentStageIndex++;
+                currentMass += stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass;
+                currentPhase = FlightPhase::BOOST;
+            } else {
+                currentPhase = FlightPhase::BURNOUT;
+            }
         }
         else if (currentPhase == FlightPhase::BURNOUT && velocityZ > 0.0) {
             currentPhase = FlightPhase::COAST;
@@ -109,7 +118,9 @@ namespace RTS {
     double Vehicle::getAltitude() const { return positionZ; }
     double Vehicle::getPositionX() const { return positionX; }
     double Vehicle::getPositionY() const { return positionY; }
-    bool Vehicle::isBurnout() const { return propellantMass <= 0.0; }
+    bool Vehicle::isBurnout() const {
+    return stages[currentStageIndex].propellantMass <= 0.0;
+    }
     FlightPhase Vehicle::getPhase() const { return currentPhase; }
 
 }

@@ -1,12 +1,21 @@
 #pragma once
+#include <vector>
 #include "Integrator.h"
 #include "DragModel.h"
 
 namespace RTS {
 
+    struct Stage {
+        double dryMass;
+        double propellantMass;
+        double thrust;
+        double isp;
+        double burnTime;
+    };
+
     class Vehicle {
     public:
-        Vehicle(double dryMass, double propellantMass, double thrust, double isp);
+        Vehicle(std::vector<Stage> stages);
 
         void update(double dt, double airDensity, double speedOfSound);
 
@@ -20,10 +29,8 @@ namespace RTS {
         FlightPhase getPhase() const;
 
     private:
-        double dryMass;
-        double propellantMass;
-        double thrust;
-        double isp;
+        std::vector<Stage> stages;
+        int currentStageIndex;
 
         double currentMass;
         double positionX, positionY, positionZ;

@@ -1,6 +1,18 @@
 {
-  "dryMass": 30200,
-  "propellantMass": 138200,
-  "thrust": 4846900,
-  "isp": 269
+  "stages": [
+    {
+      "dryMass": 27000,
+      "propellantMass": 129000,
+      "thrust": 4846900,
+      "isp": 269,
+      "burnTime": 110
+    },
+    {
+      "dryMass": 3200,
+      "propellantMass": 9200,
+      "thrust": 800000,
+      "isp": 293,
+      "burnTime": 150
+    }
+  ]
 }

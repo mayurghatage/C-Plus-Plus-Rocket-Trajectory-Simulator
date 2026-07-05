@@ -10,6 +10,7 @@ std::string phaseToString(RTS::FlightPhase phase) {
         case RTS::FlightPhase::PRE_LAUNCH:        return "PRE_LAUNCH";
         case RTS::FlightPhase::BOOST:             return "BOOST";
         case RTS::FlightPhase::MAX_Q:             return "MAX_Q";
+        case RTS::FlightPhase::STAGE_SEPARATION:  return "STAGE_SEPARATION";
         case RTS::FlightPhase::BURNOUT:           return "BURNOUT";
         case RTS::FlightPhase::COAST:             return "COAST";
         case RTS::FlightPhase::APOGEE:            return "APOGEE";
@@ -59,7 +60,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Config load failed: " << e.what() << std::endl;
         return 1;
     }
-    RTS::Vehicle rocket(cfg.dryMass, cfg.propellantMass, cfg.thrust, cfg.isp);
+    RTS::Vehicle rocket(cfg.stages);
     double dt = 0.1;
     double simTime = 0.0;
 
