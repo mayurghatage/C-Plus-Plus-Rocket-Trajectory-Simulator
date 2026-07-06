@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stdexcept> 
 
 struct VehicleConfig {
     std::vector<RTS::Stage> stages;
@@ -21,6 +22,11 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
         stage.thrust = s["thrust"];
         stage.isp = s["isp"];
         stage.burnTime = s["burnTime"];
+
+        if (stage.propellantMass <= 0 || stage.thrust <= 0 || stage.burnTime <= 0) {
+            throw std::runtime_error("Invalid stage config: propellantMass, thrust, and burnTime must be positive");
+        }
+
         config.stages.push_back(stage);
     }
 
