@@ -8,6 +8,7 @@
 
 struct VehicleConfig {
     std::vector<RTS::Stage> stages;
+    double payloadMass;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
@@ -27,7 +28,7 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
             throw std::runtime_error("Invalid stage config: propellantMass, thrust, and burnTime must be positive");
         }
 
-        config.stages.push_back(stage);
+        config.payloadMass = data.value("payloadMass", 0.0);
     }
 
     return config;

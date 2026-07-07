@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Config load failed: " << e.what() << std::endl;
         return 1;
     }
-    RTS::Vehicle rocket(cfg.stages);
+    RTS::Vehicle rocket(cfg.stages, cfg.payloadMass);
     double dt = 0.1;
     double simTime = 0.0;
 

@@ -15,7 +15,7 @@ namespace RTS {
 
     class Vehicle {
     public:
-        Vehicle(std::vector<Stage> stages);
+        Vehicle(std::vector<Stage> stages, double payloadMass);
 
         void update(double dt, double airDensity, double speedOfSound);
 
@@ -32,6 +32,7 @@ namespace RTS {
         std::vector<Stage> stages;
         int currentStageIndex;
 
+        double payloadMass;
         double currentMass;
         double positionX, positionY, positionZ;
         double velocityX, velocityY, velocityZ;

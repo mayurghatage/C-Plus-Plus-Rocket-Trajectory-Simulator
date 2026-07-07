@@ -4,9 +4,10 @@
 
 namespace RTS {
 
-    Vehicle::Vehicle(std::vector<Stage> stages)
+    Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass)
     : stages(std::move(stages)), currentStageIndex(0),
-    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass),
+    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
+    payloadMass(payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
     currentPhase(FlightPhase::PRE_LAUNCH) {}
@@ -72,9 +73,9 @@ namespace RTS {
         velocityZ += (dt/6.0)*(k1.dvz + 2*k2.dvz + 2*k3.dvz + k4.dvz);
         currentMass += (dt/6.0)*(k1.dMass + 2*k2.dMass + 2*k3.dMass + k4.dMass);
 
-        double massLost = (stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass) - currentMass;
+        double massLost = (stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass + payloadMass) - currentMass;
         stages[currentStageIndex].propellantMass = std::max(0.0, stages[currentStageIndex].propellantMass - massLost);
-        if (currentMass < stages[currentStageIndex].dryMass) currentMass = stages[currentStageIndex].dryMass;
+        if (currentMass < stages[currentStageIndex].dryMass + payloadMass) currentMass = stages[currentStageIndex].dryMass + payloadMass;
 
         double speed = std::sqrt(velocityX*velocityX + velocityY*velocityY + velocityZ*velocityZ);
         double dynamicPressure = 0.5 * airDensity * speed * speed;
