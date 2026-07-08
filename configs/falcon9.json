@@ -15,5 +15,8 @@
       "burnTime": 397
     }
   ],
-  "payloadMass": 10000
+  "payloadMass": 10000,
+  "bodyDiameter": 3.7,
+  "fairingDiameter": 5.2,
+  "noseLength": 13.1
 }
