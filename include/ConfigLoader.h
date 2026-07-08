@@ -16,6 +16,8 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
     nlohmann::json data = nlohmann::json::parse(file);
 
     VehicleConfig config;
+    config.payloadMass = data.value("payloadMass", 0.0);
+
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;
         stage.dryMass = s["dryMass"];
@@ -28,7 +30,7 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
             throw std::runtime_error("Invalid stage config: propellantMass, thrust, and burnTime must be positive");
         }
 
-        config.payloadMass = data.value("payloadMass", 0.0);
+        config.stages.push_back(stage);
     }
 
     return config;
