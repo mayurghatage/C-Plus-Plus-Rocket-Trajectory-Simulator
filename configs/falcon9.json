@@ -16,6 +16,9 @@
     }
   ],
   "payloadMass": 10000,
+  "parachuteDeployAltitude": 3000,
+  "parachuteCd": 1.5,
+  "parachuteArea": 60.0,
   "bodyDiameter": 3.7,
   "fairingDiameter": 5.2,
   "noseLength": 13.1

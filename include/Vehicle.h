@@ -33,6 +33,9 @@ namespace RTS {
         int currentStageIndex;
 
         double payloadMass;
+        double parachuteDeployAltitude;
+        double parachuteCd;
+        double parachuteArea;
         double currentMass;
         double positionX, positionY, positionZ;
         double velocityX, velocityY, velocityZ;

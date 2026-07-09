@@ -9,6 +9,9 @@
 struct VehicleConfig {
     std::vector<RTS::Stage> stages;
     double payloadMass;
+    double parachuteDeployAltitude;
+    double parachuteCd;
+    double parachuteArea;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
@@ -17,6 +20,9 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
 
     VehicleConfig config;
     config.payloadMass = data.value("payloadMass", 0.0);
+    config.parachuteDeployAltitude = data.value("parachuteDeployAltitude", 3000.0);
+    config.parachuteCd = data.value("parachuteCd", 0.0);
+    config.parachuteArea = data.value("parachuteArea", 0.0);
 
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;
