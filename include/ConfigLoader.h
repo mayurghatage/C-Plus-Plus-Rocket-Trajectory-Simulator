@@ -12,6 +12,9 @@ struct VehicleConfig {
     double parachuteDeployAltitude;
     double parachuteCd;
     double parachuteArea;
+    double bodyDiameter;
+    double fairingDiameter;
+    double noseLength;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
@@ -23,6 +26,9 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
     config.parachuteDeployAltitude = data.value("parachuteDeployAltitude", 3000.0);
     config.parachuteCd = data.value("parachuteCd", 0.0);
     config.parachuteArea = data.value("parachuteArea", 0.0);
+    config.bodyDiameter = data.value("bodyDiameter", 0.0);
+    config.fairingDiameter = data.value("fairingDiameter", 0.0);
+    config.noseLength = data.value("noseLength", 0.0);
 
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;
