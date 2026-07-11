@@ -4,10 +4,12 @@
 
 namespace RTS {
 
-    Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass)
+    Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass,
+                  double bodyDiameter, double fairingDiameter, double noseLength)
     : stages(std::move(stages)), currentStageIndex(0),
-    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     payloadMass(payloadMass),
+    bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),
+    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
     currentPhase(FlightPhase::PRE_LAUNCH) {}

@@ -15,7 +15,8 @@ namespace RTS {
 
     class Vehicle {
     public:
-        Vehicle(std::vector<Stage> stages, double payloadMass);
+        Vehicle(std::vector<Stage> stages, double payloadMass,
+            double bodyDiameter, double fairingDiameter, double noseLength);
 
         void update(double dt, double airDensity, double speedOfSound);
 
@@ -36,6 +37,9 @@ namespace RTS {
         double parachuteDeployAltitude;
         double parachuteCd;
         double parachuteArea;
+        double bodyDiameter;
+        double fairingDiameter;
+        double noseLength;
         double currentMass;
         double positionX, positionY, positionZ;
         double velocityX, velocityY, velocityZ;
