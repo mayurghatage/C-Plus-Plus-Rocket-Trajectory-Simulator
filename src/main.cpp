@@ -4,6 +4,7 @@
 #include "Atmosphere.h"
 #include "Vehicle.h"
 #include "ConfigLoader.h"
+#include "Aerodynamics.h"
 
 std::string phaseToString(RTS::FlightPhase phase) {
     switch (phase) {
