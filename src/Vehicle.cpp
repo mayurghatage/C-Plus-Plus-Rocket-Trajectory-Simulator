@@ -8,7 +8,7 @@ namespace RTS {
                   double bodyDiameter, double fairingDiameter, double noseLength)
     : stages(std::move(stages)), currentStageIndex(0),
     payloadMass(payloadMass),
-    bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),
+    bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),noseAero(computeNoseAero(bodyDiameter)),
     currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),

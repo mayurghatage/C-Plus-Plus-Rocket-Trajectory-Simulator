@@ -2,6 +2,7 @@
 #include <vector>
 #include "Integrator.h"
 #include "DragModel.h"
+#include "Aerodynamics.h"
 
 namespace RTS {
 
@@ -40,6 +41,7 @@ namespace RTS {
         double bodyDiameter;
         double fairingDiameter;
         double noseLength;
+        AeroCoefficients noseAero;
         double currentMass;
         double positionX, positionY, positionZ;
         double velocityX, velocityY, velocityZ;
