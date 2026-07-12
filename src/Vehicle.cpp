@@ -4,6 +4,9 @@
 
 namespace RTS {
 
+    constexpr double GM_EARTH = 3.986004418e14;
+    constexpr double R_EARTH = 6371000.0;
+
     Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass,
                   double bodyDiameter, double fairingDiameter, double noseLength)
     : stages(std::move(stages)), currentStageIndex(0),
@@ -12,7 +15,7 @@ namespace RTS {
     currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
-    currentPhase(FlightPhase::PRE_LAUNCH) {}
+    currentPhase(FlightPhase::PRE_LAUNCH), impactVelocity(0.0) {}
 
     Derivative Vehicle::computeDerivative(const State& s, double airDensity, double speedOfSound) const {
         const Stage& stage = stages[currentStageIndex];
@@ -40,7 +43,9 @@ namespace RTS {
 
         double accX = (thrustX - dragX) / s.mass;
         double accY = (thrustY - dragY) / s.mass;
-        double accZ = (thrustZ - dragZ - s.mass * g0) / s.mass;
+        double r = R_EARTH + s.z;
+        double localG = GM_EARTH / (r * r);
+        double accZ = (thrustZ - dragZ - s.mass * localG) / s.mass;
 
         double massFlowRate = burning ? -(stage.thrust / (stage.isp * g0)) : 0.0;
 
@@ -102,6 +107,9 @@ namespace RTS {
         else if (currentPhase == FlightPhase::BURNOUT && velocityZ > 0.0) {
             currentPhase = FlightPhase::COAST;
         }
+        else if (currentPhase == FlightPhase::BURNOUT && velocityZ <= 0.0) {
+            currentPhase = FlightPhase::DESCENT;
+        }
         else if (currentPhase == FlightPhase::COAST && velocityZ <= 0.0) {
             currentPhase = FlightPhase::APOGEE;
         }
@@ -109,6 +117,7 @@ namespace RTS {
             currentPhase = FlightPhase::DESCENT;
         }
         else if (currentPhase == FlightPhase::DESCENT && positionZ <= 0.0) {
+            impactVelocity = std::sqrt(velocityX*velocityX + velocityY*velocityY + velocityZ*velocityZ);
             currentPhase = FlightPhase::LANDED;
             positionZ = 0.0;
             velocityZ = 0.0;
@@ -125,6 +134,7 @@ namespace RTS {
     bool Vehicle::isBurnout() const {
     return stages[currentStageIndex].propellantMass <= 0.0;
     }
+    double Vehicle::getImpactVelocity() const { return impactVelocity; }
     FlightPhase Vehicle::getPhase() const { return currentPhase; }
 
 }

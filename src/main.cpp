@@ -126,6 +126,16 @@ int main(int argc, char* argv[]) {
     // Close CSV file
     telemetryFile.close();
 
+    double landingVelocity = rocket.getImpactVelocity();
+    std::string landingStatus;
+    if (rocket.getPhase() != RTS::FlightPhase::LANDED) {
+        landingStatus = "SIMULATION ENDED - DID NOT LAND (still falling)";
+    } else if (landingVelocity < 5.0) {
+        landingStatus = "SOFT LANDING";
+    } else {
+        landingStatus = "HARD IMPACT / CRASH";
+    }
+
     // Mission summary
     std::cout << "\n================================================================" << std::endl;
     std::cout << "                    MISSION SUMMARY                               " << std::endl;
@@ -135,6 +145,8 @@ int main(int argc, char* argv[]) {
     std::cout << " Max-Q           : " << maxQ           << " Pa"                     << std::endl;
     std::cout << " Burnout Time    : " << burnoutTime    << " s"                      << std::endl;
     std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
+    std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
+    std::cout << " Landing Status  : " << landingStatus                               << std::endl;
     std::cout << " Total Flight    : " << simTime        << " s"                      << std::endl;
     std::cout << "==================================================================" << std::endl;
 
