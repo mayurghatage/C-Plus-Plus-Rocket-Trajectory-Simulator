@@ -15,6 +15,11 @@ struct VehicleConfig {
     double bodyDiameter;
     double fairingDiameter;
     double noseLength;
+    int finCount;
+    double finSpan;
+    double finRootChord;
+    double finTipChord;
+    double finSweepDistance;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
@@ -29,6 +34,11 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
     config.bodyDiameter = data.value("bodyDiameter", 0.0);
     config.fairingDiameter = data.value("fairingDiameter", 0.0);
     config.noseLength = data.value("noseLength", 0.0);
+    config.finCount = data.value("finCount", 4);
+    config.finSpan = data.value("finSpan", 0.0);
+    config.finRootChord = data.value("finRootChord", 0.0);
+    config.finTipChord = data.value("finTipChord", 0.0);
+    config.finSweepDistance = data.value("finSweepDistance", 0.0);
 
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;
