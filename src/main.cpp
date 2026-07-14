@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
     double maxQ = 0.0;
     double burnoutTime = 0.0;
     double burnoutAltitude = 0.0;
+    double burnoutVelocity = 0.0;
 
     while (simTime < 600.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
@@ -104,6 +105,7 @@ int main(int argc, char* argv[]) {
         if (rocket.getPhase() == RTS::FlightPhase::BURNOUT && burnoutTime == 0.0) {
             burnoutTime = simTime;
             burnoutAltitude = rocket.getAltitude();
+            burnoutVelocity = std::abs(rocket.getVelocity());
         }
 
         if (rocket.getAltitude() <= 0.0 && rocket.getPhase() == RTS::FlightPhase::DESCENT) {
@@ -136,6 +138,15 @@ int main(int argc, char* argv[]) {
         landingStatus = "HARD IMPACT / CRASH";
     }
 
+    const double GM_EARTH = 3.986004418e14;
+    const double R_EARTH  = 6371000.0;
+    double burnoutRadius = R_EARTH + burnoutAltitude;
+    double escapeVelocity = std::sqrt(2.0 * GM_EARTH / burnoutRadius);
+    double orbitalVelocity = std::sqrt(GM_EARTH / burnoutRadius);
+    std::string velocityVerdict = (burnoutVelocity >= escapeVelocity) ? "EXCEEDS ESCAPE VELOCITY"
+                                : (burnoutVelocity >= orbitalVelocity) ? "EXCEEDS ORBITAL VELOCITY"
+                                : "SUBORBITAL";
+
     // Mission summary
     std::cout << "\n================================================================" << std::endl;
     std::cout << "                    MISSION SUMMARY                               " << std::endl;
@@ -148,6 +159,9 @@ int main(int argc, char* argv[]) {
     std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
     std::cout << " Landing Status  : " << landingStatus                               << std::endl;
     std::cout << " Total Flight    : " << simTime        << " s"                      << std::endl;
+    std::cout << " Escape Velocity : " << escapeVelocity  << " m/s"                   << std::endl;
+    std::cout << " Orbital Velocity: " << orbitalVelocity << " m/s"                   << std::endl;
+    std::cout << " Velocity Verdict: " << velocityVerdict                             << std::endl;
     std::cout << "==================================================================" << std::endl;
 
     return 0;
