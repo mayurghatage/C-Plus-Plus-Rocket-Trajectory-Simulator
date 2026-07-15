@@ -117,7 +117,8 @@ int main(int argc, char* argv[]) {
             std::cout << "t=" << simTime << "s | alt=" << rocket.getAltitude()
                       << " m | v=" << rocket.getVelocity()
                       << " m/s | mass=" << rocket.getMass() 
-                      << " kg | phase=" << phaseToString(rocket.getPhase()) << std::endl;
+                      << " kg | stage=" << (rocket.getCurrentStageIndex() + 1) << "/" << rocket.getTotalStages()
+                      << " | phase=" << phaseToString(rocket.getPhase()) << std::endl;
         }
 
         if (rocket.getPhase() == RTS::FlightPhase::LANDED) {
@@ -138,12 +139,10 @@ int main(int argc, char* argv[]) {
         landingStatus = "HARD IMPACT / CRASH";
     }
 
-    const double GM_EARTH = 3.986004418e14;
-    const double R_EARTH  = 6371000.0;
-    double burnoutRadius = R_EARTH + burnoutAltitude;
-    double escapeVelocity = std::sqrt(2.0 * GM_EARTH / burnoutRadius);
-    double orbitalVelocity = std::sqrt(GM_EARTH / burnoutRadius);
-    std::string velocityVerdict = (burnoutVelocity >= escapeVelocity) ? "EXCEEDS ESCAPE VELOCITY"
+    double escapeVelocity = rocket.getOrbitalVelocity(burnoutAltitude) * std::sqrt(2.0);
+    double orbitalVelocity = rocket.getOrbitalVelocity(burnoutAltitude);
+    bool escaped = rocket.hasEscapedGravity(0.0, 0.0, burnoutVelocity, burnoutAltitude);
+    std::string velocityVerdict = escaped ? "EXCEEDS ESCAPE VELOCITY"
                                 : (burnoutVelocity >= orbitalVelocity) ? "EXCEEDS ORBITAL VELOCITY"
                                 : "SUBORBITAL";
 
@@ -163,6 +162,8 @@ int main(int argc, char* argv[]) {
     std::cout << " Orbital Velocity: " << orbitalVelocity << " m/s"                   << std::endl;
     std::cout << " Velocity Verdict: " << velocityVerdict                             << std::endl;
     std::cout << "==================================================================" << std::endl;
+
+
 
     return 0;
 }
