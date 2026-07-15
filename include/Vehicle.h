@@ -51,10 +51,12 @@ namespace RTS {
         DragModel dragModel;
 
         Derivative computeDerivative(const State& s, double airDensity, double speedOfSound) const;
+        bool hasEscapedGravity(double vx, double vy, double vz, double altitude) const;
+    double getOrbitalVelocity(double altitude) const;
 
         static constexpr double g0 = 9.80665;
 
         FlightPhase currentPhase;
     };
 
-}
+};

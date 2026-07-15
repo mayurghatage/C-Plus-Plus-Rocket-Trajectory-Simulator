@@ -52,6 +52,18 @@ namespace RTS {
         return Derivative{s.vx, s.vy, s.vz, accX, accY, accZ, massFlowRate};
     }
 
+    bool Vehicle::hasEscapedGravity(double vx, double vy, double vz, double altitude) const {
+        double r = R_EARTH + altitude;
+        double speed = std::sqrt(vx*vx + vy*vy + vz*vz);
+        double vEscape = std::sqrt(2 * GM_EARTH / r);
+        return speed >= vEscape;
+    }
+
+    double Vehicle::getOrbitalVelocity(double altitude) const {
+        double r = R_EARTH + altitude;
+        return std::sqrt(GM_EARTH / r);
+    }
+
     void Vehicle::update(double dt, double airDensity, double speedOfSound) {
 
         State current{positionX, positionY, positionZ, velocityX, velocityY, velocityZ, currentMass};
