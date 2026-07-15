@@ -28,8 +28,12 @@ namespace RTS {
         double getPositionY() const;
         bool isBurnout() const;
         double getImpactVelocity() const;
+        bool hasEscapedGravity(double vx, double vy, double vz, double altitude) const;
+        double getOrbitalVelocity(double altitude) const;
 
         FlightPhase getPhase() const;
+        int getCurrentStageIndex() const { return currentStageIndex; }
+        int getTotalStages() const { return static_cast<int>(stages.size()); }
 
     private:
         std::vector<Stage> stages;
@@ -51,8 +55,6 @@ namespace RTS {
         DragModel dragModel;
 
         Derivative computeDerivative(const State& s, double airDensity, double speedOfSound) const;
-        bool hasEscapedGravity(double vx, double vy, double vz, double altitude) const;
-    double getOrbitalVelocity(double altitude) const;
 
         static constexpr double g0 = 9.80665;
 
