@@ -18,4 +18,10 @@ namespace RTS {
         return aero;
     }
 
+    inline double computeNormalForceCoefficient(double alpha, double cnAlphaNose, double cnAlphaFin) {
+        double cnNose = cnAlphaNose * alpha;
+        double cnFin = cnAlphaFin * alpha; 
+        return cnNose + cnFin;
+    }
+
 }
