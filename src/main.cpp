@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     // Atmosphere test
     RTS::AtmosphereModel atmo;
-    double testAltitudes[] = {0, 5000, 11000, 20000, 35000, 50000};
+    const double testAltitudes[] = {0, 5000, 11000, 20000, 35000, 50000};
 
     std::cout << "\n--- ATMOSPHERE MODULE TEST ---" << std::endl;
     for (double alt : testAltitudes) {
