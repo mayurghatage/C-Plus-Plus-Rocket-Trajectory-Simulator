@@ -61,7 +61,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Config load failed: " << e.what() << std::endl;
         return 1;
     }
-    RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength);
+    RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
+                        cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance);
     double dt = 0.1;
     double simTime = 0.0;
 
