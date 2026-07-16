@@ -14,5 +14,17 @@
       "isp": 293,
       "burnTime": 150
     }
-  ]
+  ],
+  "payloadMass": 3800,
+  "parachuteDeployAltitude": 3000,
+  "parachuteCd": 1.5,
+  "parachuteArea": 60.0,
+  "bodyDiameter": 2.8,
+  "fairingDiameter": 3.2,
+  "noseLength": 8.0,
+  "finCount": 4,
+  "finSpan": 1.0,
+  "finRootChord": 2.2,
+  "finTipChord": 0.8,
+  "finSweepDistance": 1.2
 }
