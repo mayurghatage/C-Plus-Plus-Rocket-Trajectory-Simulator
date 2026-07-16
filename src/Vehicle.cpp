@@ -8,10 +8,16 @@ namespace RTS {
     constexpr double R_EARTH = 6371000.0;
 
     Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass,
-                  double bodyDiameter, double fairingDiameter, double noseLength)
+                  double bodyDiameter, double fairingDiameter, double noseLength,
+                  int finCount, double finSpan, double finRootChord,
+                  double finTipChord, double finSweepDistance)
     : stages(std::move(stages)), currentStageIndex(0),
     payloadMass(payloadMass),
-    bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),noseAero(computeNoseAero(bodyDiameter)),
+    bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),
+    finCount(finCount), finSpan(finSpan), finRootChord(finRootChord),
+    finTipChord(finTipChord), finSweepDistance(finSweepDistance),
+    finCnAlpha(computeFinCnAlpha(finCount, finSpan, finRootChord, finTipChord, finSweepDistance, bodyDiameter)),
+    noseAero(computeNoseAero(bodyDiameter)),
     currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),

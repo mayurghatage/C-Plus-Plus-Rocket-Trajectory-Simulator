@@ -17,7 +17,9 @@ namespace RTS {
     class Vehicle {
     public:
         Vehicle(std::vector<Stage> stages, double payloadMass,
-            double bodyDiameter, double fairingDiameter, double noseLength);
+            double bodyDiameter, double fairingDiameter, double noseLength,
+            int finCount, double finSpan, double finRootChord,
+            double finTipChord, double finSweepDistance);
 
         void update(double dt, double airDensity, double speedOfSound);
 
@@ -46,6 +48,12 @@ namespace RTS {
         double bodyDiameter;
         double fairingDiameter;
         double noseLength;
+        int finCount;
+        double finSpan;
+        double finRootChord;
+        double finTipChord;
+        double finSweepDistance;
+        double finCnAlpha;
         AeroCoefficients noseAero;
         double currentMass;
         double positionX, positionY, positionZ;
