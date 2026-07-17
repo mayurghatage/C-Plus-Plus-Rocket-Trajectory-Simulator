@@ -20,6 +20,7 @@ struct VehicleConfig {
     double finRootChord;
     double finTipChord;
     double finSweepDistance;
+    double finPosition;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {

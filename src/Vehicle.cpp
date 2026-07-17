@@ -10,12 +10,12 @@ namespace RTS {
     Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass,
                   double bodyDiameter, double fairingDiameter, double noseLength,
                   int finCount, double finSpan, double finRootChord,
-                  double finTipChord, double finSweepDistance)
+                  double finTipChord, double finSweepDistance, double finPosition)
     : stages(std::move(stages)), currentStageIndex(0),
     payloadMass(payloadMass),
     bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),
     finCount(finCount), finSpan(finSpan), finRootChord(finRootChord),
-    finTipChord(finTipChord), finSweepDistance(finSweepDistance),
+    finTipChord(finTipChord), finSweepDistance(finSweepDistance), finPosition(finPosition),
     finCnAlpha(computeFinCnAlpha(finCount, finSpan, finRootChord, finTipChord, finSweepDistance, bodyDiameter)),
     noseAero(computeNoseAero(bodyDiameter)),
     currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
@@ -154,5 +154,13 @@ namespace RTS {
     }
     double Vehicle::getImpactVelocity() const { return impactVelocity; }
     FlightPhase Vehicle::getPhase() const { return currentPhase; }
+    double Vehicle::getStabilityMargin() const {
+        double xNose = computeNoseCP(noseLength);
+        double xFin = computeFinCP(finPosition, finRootChord, finTipChord, finSweepDistance);
+        double xCp = computeCP(noseAero.cnAlphaNose, xNose, finCnAlpha, xFin);
+        double totalLength = noseLength + finPosition + finRootChord; // rough estimate, adjust if you track exact length
+        double xCg = 0.55 * totalLength;
+        return computeStabilityMargin(xCp, xCg, bodyDiameter);
+    }
 
 }

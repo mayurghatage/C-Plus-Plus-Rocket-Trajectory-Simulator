@@ -33,4 +33,22 @@ namespace RTS {
         return cnNose + cnFin;
     }
 
+    inline double computeNoseCP(double noseLength) {
+        return 0.466 * noseLength;  // ogive nose approximation
+    }
+
+    inline double computeFinCP(double finPosition, double finRootChord, double finTipChord, double finSweepDistance) {
+        return finPosition
+             + (finSweepDistance * (finRootChord + 2.0*finTipChord)) / (3.0 * (finRootChord + finTipChord))
+             + (1.0/6.0) * (finRootChord + finTipChord - (finRootChord*finTipChord)/(finRootChord+finTipChord));
+    }
+
+    inline double computeCP(double cnAlphaNose, double xNose, double cnAlphaFin, double xFin) {
+        return (cnAlphaNose * xNose + cnAlphaFin * xFin) / (cnAlphaNose + cnAlphaFin);
+    }
+
+    inline double computeStabilityMargin(double xCp, double xCg, double bodyDiameter) {
+        return (xCp - xCg) / bodyDiameter;  // in calibers
+    }
+
 }

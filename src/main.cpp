@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
-                        cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance);
+                        cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition);
     double dt = 0.1;
     double simTime = 0.0;
 
@@ -172,6 +172,7 @@ int main(int argc, char* argv[]) {
     std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
     std::cout << " Final Stage     : " << (rocket.getCurrentStageIndex() + 1) << "/" << rocket.getTotalStages() << std::endl;
     std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
+    std::cout << " Stability Margin: " << rocket.getStabilityMargin() << " calibers" << std::endl;
     std::cout << "==================================================================" << std::endl;
 
 

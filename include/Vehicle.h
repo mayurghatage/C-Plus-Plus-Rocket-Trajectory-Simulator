@@ -19,7 +19,7 @@ namespace RTS {
         Vehicle(std::vector<Stage> stages, double payloadMass,
             double bodyDiameter, double fairingDiameter, double noseLength,
             int finCount, double finSpan, double finRootChord,
-            double finTipChord, double finSweepDistance);
+            double finTipChord, double finSweepDistance, double finPosition);
 
         void update(double dt, double airDensity, double speedOfSound);
 
@@ -32,6 +32,7 @@ namespace RTS {
         double getImpactVelocity() const;
         bool hasEscapedGravity(double vx, double vy, double vz, double altitude) const;
         double getOrbitalVelocity(double altitude) const;
+        double getStabilityMargin() const;
 
         FlightPhase getPhase() const;
         int getCurrentStageIndex() const { return currentStageIndex; }
@@ -53,6 +54,7 @@ namespace RTS {
         double finRootChord;
         double finTipChord;
         double finSweepDistance;
+        double finPosition;  
         double finCnAlpha;
         AeroCoefficients noseAero;
         double currentMass;
