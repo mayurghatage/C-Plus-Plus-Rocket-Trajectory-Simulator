@@ -77,11 +77,18 @@ int main(int argc, char* argv[]) {
     double burnoutTime = 0.0;
     double burnoutAltitude = 0.0;
     double burnoutVelocity = 0.0;
+    int lastLoggedStage = 0; 
 
     while (simTime < 600.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
         rocket.update(dt, props.density, props.speedOfSound);
         simTime += dt;
+
+        if (rocket.getCurrentStageIndex() > lastLoggedStage) {
+            lastLoggedStage = rocket.getCurrentStageIndex();
+            std::cout << "[STAGE SEPARATION] Stage " << lastLoggedStage
+                      << " ignited at t=" << simTime << "s, alt=" << rocket.getAltitude() << " m" << std::endl;
+        }
 
     double mach = std::abs(rocket.getVelocity()) / props.speedOfSound;
 
@@ -162,6 +169,9 @@ int main(int argc, char* argv[]) {
     std::cout << " Escape Velocity : " << escapeVelocity  << " m/s"                   << std::endl;
     std::cout << " Orbital Velocity: " << orbitalVelocity << " m/s"                   << std::endl;
     std::cout << " Velocity Verdict: " << velocityVerdict                             << std::endl;
+    std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
+    std::cout << " Final Stage     : " << (rocket.getCurrentStageIndex() + 1) << "/" << rocket.getTotalStages() << std::endl;
+    std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
     std::cout << "==================================================================" << std::endl;
 
 
