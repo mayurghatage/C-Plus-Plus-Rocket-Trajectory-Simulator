@@ -78,6 +78,7 @@ int main(int argc, char* argv[]) {
     double burnoutAltitude = 0.0;
     double burnoutVelocity = 0.0;
     int lastLoggedStage = 0; 
+    bool missionSuccessExit = false; 
 
     while (simTime < 1000.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
@@ -116,6 +117,17 @@ int main(int argc, char* argv[]) {
             burnoutVelocity = std::abs(rocket.getVelocity());
         }
 
+        if (cfg.vehicleType == "expendable") {
+            bool reachedOrbit = rocket.hasEscapedGravity(0.0, 0.0, rocket.getVelocity(), rocket.getAltitude())
+                              || rocket.getVelocity() >= rocket.getOrbitalVelocity(rocket.getAltitude());
+            if (reachedOrbit) {
+                std::cout << "[MISSION SUCCESS] Payload reached orbital/escape velocity at t="
+                          << simTime << "s, alt=" << rocket.getAltitude() << " m" << std::endl;
+                missionSuccessExit = true;
+                break;
+            }
+        }
+
         if (rocket.getAltitude() <= 0.0 && rocket.getPhase() == RTS::FlightPhase::DESCENT) {
             std::cout << "[MISSION COMPLETE] Vehicle impacted ground at t=" << simTime << "s" << std::endl;
             break;
@@ -139,7 +151,9 @@ int main(int argc, char* argv[]) {
 
     double landingVelocity = rocket.getImpactVelocity();
     std::string landingStatus;
-    if (rocket.getPhase() != RTS::FlightPhase::LANDED) {
+    if (missionSuccessExit) {
+        landingStatus = "N/A - Expendable Vehicle (Orbital Insertion Achieved)";
+    } else if (rocket.getPhase() != RTS::FlightPhase::LANDED) {
         landingStatus = "SIMULATION ENDED - DID NOT LAND (still falling)";
     } else if (landingVelocity < 5.0) {
         landingStatus = "SOFT LANDING";

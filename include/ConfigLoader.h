@@ -21,6 +21,7 @@ struct VehicleConfig {
     double finTipChord;
     double finSweepDistance;
     double finPosition;
+    std::string vehicleType;
 };
 
 inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
@@ -41,6 +42,7 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
     config.finTipChord = data.value("finTipChord", 0.0);
     config.finSweepDistance = data.value("finSweepDistance", 0.0);
     config.finPosition = data.value("finPosition", 0.0);
+    config.vehicleType = data.value("vehicleType", "expendable");
 
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;

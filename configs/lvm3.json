@@ -16,6 +16,7 @@
     }
   ],
   "payloadMass": 4000,
+  "vehicleType": "expendable",
   "parachuteDeployAltitude": 3000,
   "parachuteCd": 1.5,
   "parachuteArea": 60.0,
