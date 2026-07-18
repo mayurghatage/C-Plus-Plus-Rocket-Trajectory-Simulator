@@ -10,7 +10,8 @@ namespace RTS {
     Vehicle::Vehicle(std::vector<Stage> stages, double payloadMass,
                   double bodyDiameter, double fairingDiameter, double noseLength,
                   int finCount, double finSpan, double finRootChord,
-                  double finTipChord, double finSweepDistance, double finPosition)
+                  double finTipChord, double finSweepDistance, double finPosition,
+                  double totalLength)
     : stages(std::move(stages)), currentStageIndex(0),
     payloadMass(payloadMass),
     bodyDiameter(bodyDiameter), fairingDiameter(fairingDiameter), noseLength(noseLength),
@@ -21,7 +22,26 @@ namespace RTS {
     currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
-    currentPhase(FlightPhase::PRE_LAUNCH), impactVelocity(0.0) {}
+    currentPhase(FlightPhase::PRE_LAUNCH), impactVelocity(0.0),
+    totalLength(totalLength) {
+
+        payloadPosition = noseLength;
+        double bodyLength = totalLength - noseLength;
+
+        double totalStageMass = 0.0;
+        for (const auto& s : this->stages) {
+            totalStageMass += s.dryMass + s.propellantMass;
+        }
+
+        stagePositions.resize(this->stages.size());
+        double cursor = noseLength;
+        for (int i = static_cast<int>(this->stages.size()) - 1; i >= 0; --i) {
+            double massFraction = (this->stages[i].dryMass + this->stages[i].propellantMass) / totalStageMass;
+            double stageLength = massFraction * bodyLength;
+            stagePositions[i] = cursor + (stageLength / 2.0);
+            cursor += stageLength;
+        }
+    }
 
     Derivative Vehicle::computeDerivative(const State& s, double airDensity, double speedOfSound) const {
         const Stage& stage = stages[currentStageIndex];
@@ -158,8 +178,14 @@ namespace RTS {
         double xNose = computeNoseCP(noseLength);
         double xFin = computeFinCP(finCount, finPosition, finRootChord, finTipChord, finSweepDistance);
         double xCp = computeCP(noseAero.cnAlphaNose, xNose, finCnAlpha, xFin);
-        double totalLength = noseLength + finPosition + finRootChord;
-        double xCg = 0.55 * totalLength;
+
+        std::vector<double> attachedPositions, attachedMasses;
+        for (size_t i = currentStageIndex; i < stages.size(); ++i) {
+            attachedPositions.push_back(stagePositions[i]);
+            attachedMasses.push_back(stages[i].dryMass + stages[i].propellantMass);
+        }
+        double xCg = computeDynamicCG(attachedPositions, attachedMasses, payloadMass, payloadPosition);
+
         return computeStabilityMargin(xCp, xCg, bodyDiameter);
     }
 

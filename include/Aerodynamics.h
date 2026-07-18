@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <vector>
 
 namespace RTS {
 
@@ -53,6 +54,18 @@ namespace RTS {
 
     inline double computeStabilityMargin(double xCp, double xCg, double bodyDiameter) {
         return (xCp - xCg) / bodyDiameter;  // in calibers
+    }
+
+    inline double computeDynamicCG(const std::vector<double>& stagePositions,
+                                    const std::vector<double>& stageMasses,
+                                    double payloadMass, double payloadPosition) {
+        double totalMoment = payloadMass * payloadPosition;
+        double totalMass = payloadMass;
+        for (size_t i = 0; i < stagePositions.size(); ++i) {
+            totalMoment += stageMasses[i] * stagePositions[i];
+            totalMass += stageMasses[i];
+        }
+        return (totalMass > 0.0) ? (totalMoment / totalMass) : 0.0;
     }
 
 }

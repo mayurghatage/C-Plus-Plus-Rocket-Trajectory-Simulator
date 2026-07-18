@@ -62,7 +62,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
-                        cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition);
+                        cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
+                        cfg.totalLength);
     double dt = 0.1;
     double simTime = 0.0;
 

@@ -17,6 +17,7 @@
   ],
   "payloadMass": 10000,
   "vehicleType": "reusable",
+  "totalLength": 70.0,
   "parachuteDeployAltitude": 3000,
   "parachuteCd": 1.5,
   "parachuteArea": 60.0,
