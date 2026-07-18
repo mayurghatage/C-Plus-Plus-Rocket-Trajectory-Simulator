@@ -117,7 +117,8 @@ int main(int argc, char* argv[]) {
             burnoutVelocity = std::abs(rocket.getVelocity());
         }
 
-        if (cfg.vehicleType == "expendable") {
+        bool onFinalStage = (rocket.getCurrentStageIndex() == rocket.getTotalStages() - 1);
+        if (onFinalStage) {
             bool reachedOrbit = rocket.hasEscapedGravity(0.0, 0.0, rocket.getVelocity(), rocket.getAltitude())
                               || rocket.getVelocity() >= rocket.getOrbitalVelocity(rocket.getAltitude());
             if (reachedOrbit) {
@@ -152,7 +153,7 @@ int main(int argc, char* argv[]) {
     double landingVelocity = rocket.getImpactVelocity();
     std::string landingStatus;
     if (missionSuccessExit) {
-        landingStatus = "N/A - Expendable Vehicle (Orbital Insertion Achieved)";
+        landingStatus = "N/A - Final Stage Reached Orbit (Not Tracked Post-Insertion)";
     } else if (rocket.getPhase() != RTS::FlightPhase::LANDED) {
         landingStatus = "SIMULATION ENDED - DID NOT LAND (still falling)";
     } else if (landingVelocity < 5.0) {
