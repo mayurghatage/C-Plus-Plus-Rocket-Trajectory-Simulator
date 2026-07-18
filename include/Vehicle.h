@@ -37,6 +37,7 @@ namespace RTS {
         FlightPhase getPhase() const;
         int getCurrentStageIndex() const { return currentStageIndex; }
         int getTotalStages() const { return static_cast<int>(stages.size()); }
+        int getFinCount() const { return finCount; }
 
     private:
         std::vector<Stage> stages;

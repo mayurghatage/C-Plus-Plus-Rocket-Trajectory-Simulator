@@ -40,6 +40,7 @@ inline VehicleConfig loadVehicleConfig(const std::string& filepath) {
     config.finRootChord = data.value("finRootChord", 0.0);
     config.finTipChord = data.value("finTipChord", 0.0);
     config.finSweepDistance = data.value("finSweepDistance", 0.0);
+    config.finPosition = data.value("finPosition", 0.0);
 
     for (const auto& s : data["stages"]) {
         RTS::Stage stage;

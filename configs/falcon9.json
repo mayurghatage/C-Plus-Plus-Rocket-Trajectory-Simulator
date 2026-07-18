@@ -21,5 +21,11 @@
   "parachuteArea": 60.0,
   "bodyDiameter": 3.7,
   "fairingDiameter": 5.2,
-  "noseLength": 13.1
+  "noseLength": 13.1,
+  "finCount": 0,
+  "finSpan": 0.0,
+  "finRootChord": 0.0,
+  "finTipChord": 0.0,
+  "finSweepDistance": 0.0,
+  "finPosition": 0.0
 }

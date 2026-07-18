@@ -9,6 +9,13 @@
     },
     {
       "dryMass": 2500,
+      "propellantMass": 39000,
+      "thrust": 800000,
+      "isp": 293,
+      "burnTime": 150
+    },
+    {
+      "dryMass": 2500,
       "propellantMass": 12800,
       "thrust": 73550,
       "isp": 454,

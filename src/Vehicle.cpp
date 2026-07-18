@@ -156,9 +156,9 @@ namespace RTS {
     FlightPhase Vehicle::getPhase() const { return currentPhase; }
     double Vehicle::getStabilityMargin() const {
         double xNose = computeNoseCP(noseLength);
-        double xFin = computeFinCP(finPosition, finRootChord, finTipChord, finSweepDistance);
+        double xFin = computeFinCP(finCount, finPosition, finRootChord, finTipChord, finSweepDistance);
         double xCp = computeCP(noseAero.cnAlphaNose, xNose, finCnAlpha, xFin);
-        double totalLength = noseLength + finPosition + finRootChord; // rough estimate, adjust if you track exact length
+        double totalLength = noseLength + finPosition + finRootChord;
         double xCg = 0.55 * totalLength;
         return computeStabilityMargin(xCp, xCg, bodyDiameter);
     }
