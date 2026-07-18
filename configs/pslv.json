@@ -26,5 +26,6 @@
   "finSpan": 1.0,
   "finRootChord": 2.2,
   "finTipChord": 0.8,
-  "finSweepDistance": 1.2
+  "finSweepDistance": 1.2,
+  "finPosition": 42.0
 }
