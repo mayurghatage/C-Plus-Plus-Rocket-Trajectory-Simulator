@@ -2,7 +2,7 @@
 
 **A physics-first rocket trajectory simulator built from scratch in C++**, modelling real launch vehicles using 4th-order Runge-Kutta integration, a 7-layer ISA 1976 atmosphere, inverse-square gravity, and Barrowman aerodynamic stability theory.
 
-ASTRA isn't a wrapper around an existing physics engine, every subsystem (numerical integrator, atmosphere model, drag model, aerodynamic stability calculations, and orbital velocity checks) is implemented from first principles.
+ASTRA isn't a wrapper around an existing physics engine; every subsystem (numerical integrator, atmosphere model, drag model, aerodynamic stability calculations, and orbital velocity checks) is implemented from first principles.
 
 ---
 
@@ -30,6 +30,7 @@ Most open-source rocket simulators (RocketPy, OpenRocket) are excellent tools, b
 - Fin normal-force coefficient and CP (handles arbitrary fin count, span, chord, and sweep geometry)
 - Combined vehicle CP via normal-force-weighted averaging
 - Stability margin reported in calibres
+- **Dynamic mass-weighted centre of gravity** — recomputed every frame as propellant burns, using per-stage position/mass data (not a static estimate)
 - **Finless / TVC-stabilised vehicles handled correctly** - vehicles like GSLV, LVM3, and SSLV that use active thrust vector control (not passive fins) report `N/A (Actively Stabilised - TVC)` instead of a meaningless calibre number
 
 ### Mission Logic
@@ -119,7 +120,6 @@ t=57.7s | alt=60507.5 m | v=2869.57 m/s | mass=35682.5 kg | stage=1/3 | phase=MA
 
 Being transparent about what a physical model is versus a placeholder:
 
-- **Centre of gravity is currently a placeholder estimate** (`0.55 × total length`), not a true mass-weighted calculation across stage dry mass, propellant, and payload. This causes stability margin sign errors in some configurations. A real per-component mass/position CG model is planned.
 - **PSLV is modeled as 2 stages** as a simplification; the real vehicle is 4-stage (solid-liquid-solid-liquid).
 - Post-orbital-insertion trajectory tracking for upper stages on reusable vehicles (e.g., Falcon 9 stage 2) can currently mislabel an escaping trajectory as "descent" - a fix analogous to the expendable-vehicle mission-end logic is planned.
 
