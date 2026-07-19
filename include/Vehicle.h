@@ -34,6 +34,8 @@ namespace RTS {
         double getOrbitalVelocity(double altitude) const;
         double getStabilityMargin() const;
 
+        void applyThrustMultiplier(int stageIndex, double multiplier);
+
         FlightPhase getPhase() const;
         int getCurrentStageIndex() const { return currentStageIndex; }
         int getTotalStages() const { return static_cast<int>(stages.size()); }

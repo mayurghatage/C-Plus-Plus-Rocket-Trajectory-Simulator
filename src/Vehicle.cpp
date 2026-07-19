@@ -189,4 +189,10 @@ namespace RTS {
         return computeStabilityMargin(xCp, xCg, bodyDiameter);
     }
 
+    void Vehicle::applyThrustMultiplier(int stageIndex, double multiplier) {
+        if (stageIndex >= 0 && stageIndex < static_cast<int>(stages.size())) {
+            stages[stageIndex].thrust *= multiplier;
+        }
+    }
+
 }
