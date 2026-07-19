@@ -5,6 +5,7 @@
 #include "Vehicle.h"
 #include "ConfigLoader.h"
 #include "Aerodynamics.h"
+#include "FaultDetector.h"
 
 std::string phaseToString(RTS::FlightPhase phase) {
     switch (phase) {
@@ -64,6 +65,21 @@ int main(int argc, char* argv[]) {
     RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
                         cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
                         cfg.totalLength);
+    
+    std::cout << "\n--- FAULT DETECTION TEST ---" << std::endl;
+
+    VehicleConfig faultyCfg = RTS::injectThrustFault(cfg, 0, 0.10);
+
+    std::vector<RTS::TelemetryPoint> nominalTrajectory = RTS::runSimulation(cfg);
+    std::vector<RTS::TelemetryPoint> actualTrajectory = RTS::runSimulation(faultyCfg);
+
+    std::cout << "Nominal run: " << nominalTrajectory.size() << " points | "
+              << "Actual run: " << actualTrajectory.size() << " points" << std::endl;
+
+    RTS::compareTrajectories(nominalTrajectory, actualTrajectory);
+    std::cout << "--- END FAULT DETECTION TEST ---\n" << std::endl;
+
+
     double dt = 0.1;
     double simTime = 0.0;
 
@@ -151,6 +167,9 @@ int main(int argc, char* argv[]) {
     // Close CSV file
     telemetryFile.close();
 
+    double finalVelocity = std::abs(rocket.getVelocity());
+    double finalAltitude = rocket.getAltitude();
+
     double landingVelocity = rocket.getImpactVelocity();
     std::string landingStatus;
     if (missionSuccessExit) {
@@ -163,11 +182,11 @@ int main(int argc, char* argv[]) {
         landingStatus = "HARD IMPACT / CRASH";
     }
 
-    double escapeVelocity = rocket.getOrbitalVelocity(burnoutAltitude) * std::sqrt(2.0);
-    double orbitalVelocity = rocket.getOrbitalVelocity(burnoutAltitude);
-    bool escaped = rocket.hasEscapedGravity(0.0, 0.0, burnoutVelocity, burnoutAltitude);
+    double escapeVelocity = rocket.getOrbitalVelocity(finalAltitude) * std::sqrt(2.0);
+    double orbitalVelocity = rocket.getOrbitalVelocity(finalAltitude);
+    bool escaped = rocket.hasEscapedGravity(0.0, 0.0, finalVelocity, finalAltitude);
     std::string velocityVerdict = escaped ? "EXCEEDS ESCAPE VELOCITY"
-                                : (burnoutVelocity >= orbitalVelocity) ? "EXCEEDS ORBITAL VELOCITY"
+                                : (finalVelocity >= orbitalVelocity) ? "EXCEEDS ORBITAL VELOCITY"
                                 : "SUBORBITAL";
 
     // Mission summary
@@ -185,9 +204,7 @@ int main(int argc, char* argv[]) {
     std::cout << " Escape Velocity : " << escapeVelocity  << " m/s"                   << std::endl;
     std::cout << " Orbital Velocity: " << orbitalVelocity << " m/s"                   << std::endl;
     std::cout << " Velocity Verdict: " << velocityVerdict                             << std::endl;
-    std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
     std::cout << " Final Stage     : " << (rocket.getCurrentStageIndex() + 1) << "/" << rocket.getTotalStages() << std::endl;
-    std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
     if (rocket.getFinCount() == 0) {
         std::cout << " Stability Margin: N/A (Actively Stabilized - TVC)" << std::endl;
     } else {
