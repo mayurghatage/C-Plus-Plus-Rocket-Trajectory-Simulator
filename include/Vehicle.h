@@ -36,6 +36,7 @@ namespace RTS {
 
         void applyThrustMultiplier(int stageIndex, double multiplier);
         void applyIspMultiplier(int stageIndex, double multiplier);
+        void applyStageSeparationDelay(double extraSeconds);
 
         FlightPhase getPhase() const;
         int getCurrentStageIndex() const { return currentStageIndex; }
@@ -68,6 +69,7 @@ namespace RTS {
         double positionX, positionY, positionZ;
         double velocityX, velocityY, velocityZ;
         double impactVelocity;
+        double separationDelay = 0.0;
 
         DragModel dragModel;
 

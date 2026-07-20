@@ -201,4 +201,8 @@ namespace RTS {
         }
     }
 
+    void Vehicle::applyStageSeparationDelay(double extraSeconds) {
+        separationDelay = extraSeconds;
+    }
+
 }
