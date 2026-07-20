@@ -27,6 +27,12 @@ inline VehicleConfig injectThrustFault(const VehicleConfig& cfg, int stageIndex,
     return faulty;
 }
 
+inline VehicleConfig injectIspFault(const VehicleConfig& cfg, int stageIndex, double percentReduction) {
+    VehicleConfig faulty = cfg;
+    faulty.stages[stageIndex].isp *= (1.0 - percentReduction);
+    return faulty;
+}
+
 // Runs a full simulation from a vehicle config and returns the trajectory,
 // one TelemetryPoint per timestep. Used for both nominal and actual runs
 // in fault detection — same simulation loop, different input config.
@@ -60,11 +66,10 @@ inline std::vector<TelemetryPoint> runSimulation(const VehicleConfig& cfg, doubl
     return trajectory;
 }
 
-inline std::vector<TelemetryPoint> runSimulationWithDelayedFault(const VehicleConfig& cfg, int stageIndex,
+inline std::vector<TelemetryPoint> runSimulationWithDelayedIspFault(const VehicleConfig& cfg, int stageIndex,
                                                                   double percentReduction, double faultStartTime,
                                                                   double dt = 0.1, double maxTime = 1000.0) {
     std::vector<TelemetryPoint> trajectory;
-
     AtmosphereModel atmo;
     Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
                    cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
@@ -75,7 +80,7 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedFault(const VehicleCo
 
     while (simTime < maxTime) {
         if (!faultApplied && simTime >= faultStartTime && rocket.getCurrentStageIndex() == stageIndex) {
-            rocket.applyThrustMultiplier(stageIndex, 1.0 - percentReduction);
+            rocket.applyIspMultiplier(stageIndex, 1.0 - percentReduction);
             faultApplied = true;
         }
 

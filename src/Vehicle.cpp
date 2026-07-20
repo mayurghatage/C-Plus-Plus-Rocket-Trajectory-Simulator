@@ -195,4 +195,10 @@ namespace RTS {
         }
     }
 
+    void Vehicle::applyIspMultiplier(int stageIndex, double multiplier) {
+        if (stageIndex >= 0 && stageIndex < static_cast<int>(stages.size())) {
+            stages[stageIndex].isp *= multiplier;
+        }
+    }
+
 }

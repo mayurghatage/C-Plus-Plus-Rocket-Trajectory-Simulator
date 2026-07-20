@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\n--- FAULT DETECTION TEST ---" << std::endl;
 
     std::vector<RTS::TelemetryPoint> nominalTrajectory = RTS::runSimulation(cfg);
-    std::vector<RTS::TelemetryPoint> actualTrajectory = RTS::runSimulationWithDelayedFault(cfg, 0, 0.10, 60.0);
+    std::vector<RTS::TelemetryPoint> actualTrajectory = RTS::runSimulationWithDelayedIspFault(cfg, 0, 0.10, 60.0);
 
     std::cout << "Nominal run: " << nominalTrajectory.size() << " points | "
               << "Actual run: " << actualTrajectory.size() << " points" << std::endl;

@@ -35,6 +35,7 @@ namespace RTS {
         double getStabilityMargin() const;
 
         void applyThrustMultiplier(int stageIndex, double multiplier);
+        void applyIspMultiplier(int stageIndex, double multiplier);
 
         FlightPhase getPhase() const;
         int getCurrentStageIndex() const { return currentStageIndex; }
