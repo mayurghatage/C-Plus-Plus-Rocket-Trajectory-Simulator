@@ -77,6 +77,16 @@ int main(int argc, char* argv[]) {
     RTS::compareTrajectories(nominalTrajectory, actualTrajectory);
     std::cout << "--- END FAULT DETECTION TEST ---\n" << std::endl;
 
+    std::cout << "\n--- SEPARATION FAULT DETECTION TEST ---" << std::endl;
+
+    std::vector<RTS::TelemetryPoint> nominalTrajectory2 = RTS::runSimulation(cfg);
+    std::vector<RTS::TelemetryPoint> separationFaultTrajectory = RTS::runSimulationWithDelayedSeparationFault(cfg, 5.0, 60.0);
+
+    std::cout << "Nominal run: " << nominalTrajectory2.size() << " points | "
+              << "Separation fault run: " << separationFaultTrajectory.size() << " points" << std::endl;
+
+    RTS::compareTrajectories(nominalTrajectory2, separationFaultTrajectory);
+    std::cout << "--- END SEPARATION FAULT DETECTION TEST ---\n" << std::endl;
 
     double dt = 0.1;
     double simTime = 0.0;
