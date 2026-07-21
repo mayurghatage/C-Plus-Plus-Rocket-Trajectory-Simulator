@@ -76,8 +76,29 @@ int main(int argc, char* argv[]) {
                         cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
                         cfg.totalLength);
     
-    std::cout << "\n--- FAULT DETECTION TEST ---" << std::endl;
+    std::vector<RTS::TelemetryPoint> nominalTrajectory = RTS::runSimulation(cfg);
 
+    int faultChoice = 0;
+    double severity = 0.0;
+    double faultStartTime = 0.0;
+
+    std::cout << "\n--- INTERACTIVE FAULT TESTING ---" << std::endl;
+    std::cout << "Select fault type:" << std::endl;
+    std::cout << "  1. Isp degradation" << std::endl;
+    std::cout << "  2. Stage separation delay" << std::endl;
+    std::cout << "Enter choice (1-2): ";
+    std::cin >> faultChoice;
+
+    if (faultChoice == 1) {
+        std::cout << "Enter Isp reduction percent (e.g. 0.10 for 10%): ";
+        std::cin >> severity;
+    } else if (faultChoice == 2) {
+        std::cout << "Enter extra separation delay in seconds (e.g. 5.0): ";
+        std::cin >> severity;
+    }
+
+    std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
+    std::cin >> faultStartTime;
 
     double dt = 0.1;
     double simTime = 0.0;
