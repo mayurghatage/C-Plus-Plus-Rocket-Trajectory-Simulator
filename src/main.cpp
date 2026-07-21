@@ -23,6 +23,16 @@ std::string phaseToString(RTS::FlightPhase phase) {
     }
 }
 
+void runFaultTest(const std::string& testName, const VehicleConfig& cfg,
+                   const std::vector<RTS::TelemetryPoint>& nominal,
+                   const std::vector<RTS::TelemetryPoint>& faulty) {
+    std::cout << "\n--- " << testName << " ---" << std::endl;
+    std::cout << "Nominal run: " << nominal.size() << " points | "
+              << "Actual run: " << faulty.size() << " points" << std::endl;
+    RTS::compareTrajectories(nominal, faulty);
+    std::cout << "--- END " << testName << " ---\n" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     #ifdef _Win32
         std::system("cls");
@@ -68,25 +78,6 @@ int main(int argc, char* argv[]) {
     
     std::cout << "\n--- FAULT DETECTION TEST ---" << std::endl;
 
-    std::vector<RTS::TelemetryPoint> nominalTrajectory = RTS::runSimulation(cfg);
-    std::vector<RTS::TelemetryPoint> actualTrajectory = RTS::runSimulationWithDelayedIspFault(cfg, 0, 0.10, 60.0);
-
-    std::cout << "Nominal run: " << nominalTrajectory.size() << " points | "
-              << "Actual run: " << actualTrajectory.size() << " points" << std::endl;
-
-    RTS::compareTrajectories(nominalTrajectory, actualTrajectory);
-    std::cout << "--- END FAULT DETECTION TEST ---\n" << std::endl;
-
-    std::cout << "\n--- SEPARATION FAULT DETECTION TEST ---" << std::endl;
-
-    std::vector<RTS::TelemetryPoint> nominalTrajectory2 = RTS::runSimulation(cfg);
-    std::vector<RTS::TelemetryPoint> separationFaultTrajectory = RTS::runSimulationWithDelayedSeparationFault(cfg, 5.0, 60.0);
-
-    std::cout << "Nominal run: " << nominalTrajectory2.size() << " points | "
-              << "Separation fault run: " << separationFaultTrajectory.size() << " points" << std::endl;
-
-    RTS::compareTrajectories(nominalTrajectory2, separationFaultTrajectory);
-    std::cout << "--- END SEPARATION FAULT DETECTION TEST ---\n" << std::endl;
 
     double dt = 0.1;
     double simTime = 0.0;
