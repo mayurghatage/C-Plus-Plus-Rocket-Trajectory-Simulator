@@ -90,7 +90,7 @@ namespace RTS {
         return std::sqrt(GM_EARTH / r);
     }
 
-    void Vehicle::update(double dt, double airDensity, double speedOfSound) {
+    void Vehicle::update(double dt, double airDensity, double speedOfSound, double simTime) {
 
         State current{positionX, positionY, positionZ, velocityX, velocityY, velocityZ, currentMass};
         Derivative k1 = computeDerivative(current, airDensity, speedOfSound);
@@ -133,11 +133,17 @@ namespace RTS {
         }
         else if ((currentPhase == FlightPhase::BOOST || currentPhase == FlightPhase::MAX_Q) && isBurnout()) {
             if (currentStageIndex + 1 < static_cast<int>(stages.size())) {
-                currentPhase = FlightPhase::STAGE_SEPARATION;
-                currentMass -= stages[currentStageIndex].dryMass;
-                currentStageIndex++;
-                currentMass += stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass;
-                currentPhase = FlightPhase::BOOST;
+                if (burnoutTime < 0.0) {
+                    burnoutTime = simTime;
+                }
+                if (simTime >= burnoutTime + separationDelay) {
+                    currentPhase = FlightPhase::STAGE_SEPARATION;
+                    currentMass -= stages[currentStageIndex].dryMass;
+                    currentStageIndex++;
+                    currentMass += stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass;
+                    currentPhase = FlightPhase::BOOST;
+                    burnoutTime = -1.0;
+                }
             } else {
                 currentPhase = FlightPhase::BURNOUT;
             }

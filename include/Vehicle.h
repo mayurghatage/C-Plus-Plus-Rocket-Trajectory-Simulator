@@ -21,7 +21,7 @@ namespace RTS {
             int finCount, double finSpan, double finRootChord,
             double finTipChord, double finSweepDistance, double finPosition, double totalLength);
 
-        void update(double dt, double airDensity, double speedOfSound);
+        void update(double dt, double airDensity, double speedOfSound, double simTime);
 
         double getMass() const;
         double getVelocity() const;
@@ -70,6 +70,7 @@ namespace RTS {
         double velocityX, velocityY, velocityZ;
         double impactVelocity;
         double separationDelay = 0.0;
+        double burnoutTime = -1.0;
 
         DragModel dragModel;
 

@@ -47,7 +47,7 @@ inline std::vector<TelemetryPoint> runSimulation(const VehicleConfig& cfg, doubl
     double simTime = 0.0;
     while (simTime < maxTime) {
         AirProperties props = atmo.calculateState(rocket.getAltitude());
-        rocket.update(dt, props.density, props.speedOfSound);
+        rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
         trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase()});
@@ -85,7 +85,7 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedIspFault(const Vehicl
         }
 
         AirProperties props = atmo.calculateState(rocket.getAltitude());
-        rocket.update(dt, props.density, props.speedOfSound);
+        rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
         trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase()});

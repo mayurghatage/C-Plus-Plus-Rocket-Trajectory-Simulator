@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 
     while (simTime < 1000.0) {
         RTS::AirProperties props = atmo.calculateState(rocket.getAltitude());
-        rocket.update(dt, props.density, props.speedOfSound);
+        rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
         if (rocket.getCurrentStageIndex() > lastLoggedStage) {
