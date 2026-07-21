@@ -145,7 +145,3 @@ Beyond the three core layers: a Python-rich-based terminal UI, STK integration f
 - **Version control:** Git, conventional commits (`feat:`, `fix:`, `refactor:`)
 
 ---
-
-## Author
-
-Built by Mayur Ghatage as an independent aerospace engineering project, developed as a self-taught demonstration of computational rocketry, orbital mechanics, and numerical methods applied to real launch vehicle data.
