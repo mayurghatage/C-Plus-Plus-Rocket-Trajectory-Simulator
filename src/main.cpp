@@ -100,6 +100,16 @@ int main(int argc, char* argv[]) {
     std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
     std::cin >> faultStartTime;
 
+    if (faultChoice == 1) {
+        std::vector<RTS::TelemetryPoint> ispFaultTrajectory =
+            RTS::runSimulationWithDelayedIspFault(cfg, 0, severity, faultStartTime);
+        runFaultTest("ISP FAULT DETECTION TEST", cfg, nominalTrajectory, ispFaultTrajectory);
+    } else if (faultChoice == 2) {
+        std::vector<RTS::TelemetryPoint> separationFaultTrajectory =
+            RTS::runSimulationWithDelayedSeparationFault(cfg, severity, faultStartTime);
+        runFaultTest("SEPARATION FAULT DETECTION TEST", cfg, nominalTrajectory, separationFaultTrajectory);
+    }
+
     double dt = 0.1;
     double simTime = 0.0;
 
