@@ -137,6 +137,16 @@ Beyond the three core layers: a Python-rich-based terminal UI, STK integration f
 
 ---
 
+## Interactive Fault Testing
+After the nominal run, the program prompts for:
+1. Fault type (1 = Isp degradation, 2 = stage separation delay)
+2. Severity (percent reduction for Isp, extra seconds for separation)
+3. Fault start time (seconds)
+
+Invalid inputs are rejected with a warning, and the fault test is skipped safely.
+
+---
+
 ## Tech Stack
 
 - **Language:** C++17
