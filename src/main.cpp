@@ -100,6 +100,23 @@ int main(int argc, char* argv[]) {
     std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
     std::cin >> faultStartTime;
 
+    if (faultChoice != 1 && faultChoice != 2) {
+        std::cout << "Invalid fault choice. Skipping fault injection test." << std::endl;
+        faultChoice = 0;
+    }
+    if (faultChoice == 1 && (severity <= 0.0 || severity >= 1.0)) {
+        std::cout << "Invalid Isp reduction percent (must be between 0 and 1). Skipping fault test." << std::endl;
+        faultChoice = 0;
+    }
+    if (faultChoice == 2 && severity <= 0.0) {
+        std::cout << "Invalid separation delay (must be positive). Skipping fault test." << std::endl;
+        faultChoice = 0;
+    }
+    if (faultStartTime < 0.0) {
+        std::cout << "Invalid fault start time (must be non-negative). Skipping fault test." << std::endl;
+        faultChoice = 0;
+    }
+
     if (faultChoice == 1) {
         std::vector<RTS::TelemetryPoint> ispFaultTrajectory =
             RTS::runSimulationWithDelayedIspFault(cfg, 0, severity, faultStartTime);
