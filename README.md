@@ -130,7 +130,7 @@ Being transparent about what a physical model is versus a placeholder:
 ASTRA is built in layers, each meant to differentiate it further from existing simulators:
 
 - ✅ **Layer 1 — Barrowman Stability Analysis** (this build): CP/CG/stability margin, multi-stage dynamics, real atmosphere and gravity models
-- 🔜 **Layer 2 — Fault Detection**: compare nominal vs. actual trajectory in real time and flag deviations, a capability neither RocketPy nor OpenRocket currently offer
+- ✅ **Layer 2 — Fault Detection**: ASTRA can simulate a nominal trajectory alongside a faulty one to detect anomalies. Supported faults: Isp degradation and delayed stage separation. Each run compares nominal vs. faulty telemetry and reports percentage deviation in altitude and velocity per timestep.
 - 🔜 **Layer 3 — Inverse Design Optimiser**: given a target altitude, ASTRA solves backwards for the vehicle parameters needed to reach it
 
 Beyond the three core layers: a Python-rich-based terminal UI, STK integration for orbital analysis (Phase 2), and a companion 6-DOF attitude dynamics/control simulator are planned.
