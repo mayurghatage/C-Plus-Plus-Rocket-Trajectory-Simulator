@@ -34,7 +34,7 @@ void runFaultTest(const std::string& testName, const VehicleConfig& cfg,
 }
 
 int main(int argc, char* argv[]) {
-    #ifdef _Win32
+    #ifdef _WIN32
         std::system("cls");
     #else
         std::system("clear");
@@ -72,6 +72,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Config load failed: " << e.what() << std::endl;
         return 1;
     }
+    std::cout << "\nLoaded vehicle has " << cfg.stages.size() << " stage(s)." << std::endl;
+
     RTS::Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
                         cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
                         cfg.totalLength);
@@ -97,6 +99,16 @@ int main(int argc, char* argv[]) {
         std::cin >> severity;
     }
 
+    int stageIndex = 0;
+    if (faultChoice == 1 || faultChoice == 3) {
+        std::cout << "Enter stage index to target (0 to " << cfg.stages.size() - 1 << "): ";
+        std::cin >> stageIndex;
+        if (stageIndex < 0 || stageIndex >= static_cast<int>(cfg.stages.size())) {
+            std::cout << "Invalid stage index. Skipping fault test." << std::endl;
+            faultChoice = 0;
+        }
+    }
+
     std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
     std::cin >> faultStartTime;
 
@@ -119,7 +131,7 @@ int main(int argc, char* argv[]) {
 
     if (faultChoice == 1) {
         std::vector<RTS::TelemetryPoint> ispFaultTrajectory =
-            RTS::runSimulationWithDelayedIspFault(cfg, 0, severity, faultStartTime);
+            RTS::runSimulationWithDelayedIspFault(cfg, stageIndex, severity, faultStartTime);
         runFaultTest("ISP FAULT DETECTION TEST", cfg, nominalTrajectory, ispFaultTrajectory);
     } else if (faultChoice == 2) {
         std::vector<RTS::TelemetryPoint> separationFaultTrajectory =
