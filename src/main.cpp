@@ -133,10 +133,14 @@ int main(int argc, char* argv[]) {
         std::vector<RTS::TelemetryPoint> ispFaultTrajectory =
             RTS::runSimulationWithDelayedIspFault(cfg, stageIndex, severity, faultStartTime);
         runFaultTest("ISP FAULT DETECTION TEST", cfg, nominalTrajectory, ispFaultTrajectory);
+        RTS::compareMissionEvents(RTS::extractMissionEvents(nominalTrajectory),
+                                   RTS::extractMissionEvents(ispFaultTrajectory));
     } else if (faultChoice == 2) {
         std::vector<RTS::TelemetryPoint> separationFaultTrajectory =
             RTS::runSimulationWithDelayedSeparationFault(cfg, severity, faultStartTime);
         runFaultTest("SEPARATION FAULT DETECTION TEST", cfg, nominalTrajectory, separationFaultTrajectory);
+        RTS::compareMissionEvents(RTS::extractMissionEvents(nominalTrajectory),
+                                   RTS::extractMissionEvents(separationFaultTrajectory));
     }
 
     double dt = 0.1;

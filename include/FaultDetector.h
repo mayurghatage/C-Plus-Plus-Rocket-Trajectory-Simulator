@@ -18,6 +18,12 @@ struct TelemetryPoint {
     FlightPhase phase;
 };
 
+struct MissionEvents {
+    double stageSeparationTime = -1.0;
+    double burnoutTime = -1.0;
+    double orbitalInsertionTime = -1.0;
+};
+
 // Returns a copy of cfg with one stage's thrust reduced by percentReduction
 // (e.g. 0.10 = 10% thrust loss). Used to simulate an engine underperforming,
 // so we have a controlled "actual" run to test the fault detector against.
@@ -177,6 +183,54 @@ inline void compareTrajectories(const std::vector<TelemetryPoint>& nominal,
 
     std::cout << "\n[FAULT DETECTION SUMMARY] " << anomalyCount << " anomalies detected out of "
               << pointCount << " compared timesteps." << std::endl;
+}
+
+inline MissionEvents extractMissionEvents(const std::vector<TelemetryPoint>& trajectory) {
+    MissionEvents events;
+    for (size_t i = 0; i < trajectory.size(); ++i) {
+        const auto& pt = trajectory[i];
+        if (events.burnoutTime < 0.0 && pt.phase == FlightPhase::BURNOUT) {
+            events.burnoutTime = pt.time;
+        }
+    }
+    if (!trajectory.empty()) {
+        const auto& last = trajectory.back();
+        double r = 6371000.0 + last.altitude;
+        double orbitalV = std::sqrt(3.986004418e14 / r);
+        if (last.velocity >= orbitalV) {
+            events.orbitalInsertionTime = last.time;
+        }
+    }
+    return events;
+}
+
+inline void compareMissionEvents(const MissionEvents& nominal, const MissionEvents& actual,
+                                  double timeThreshold = 5.0) {
+    std::cout << "\n[MISSION EVENT COMPARISON]" << std::endl;
+
+    auto checkEvent = [&](const std::string& name, double nomTime, double actTime) {
+        if (nomTime < 0.0 && actTime < 0.0) {
+            std::cout << "  " << name << ": not reached in either run" << std::endl;
+            return;
+        }
+        if (nomTime < 0.0 || actTime < 0.0) {
+            std::cout << "  [FLAG] " << name << ": reached in one run but not the other "
+                      << "(nominal=" << nomTime << "s, actual=" << actTime << "s)" << std::endl;
+            return;
+        }
+        double delta = actTime - nomTime;
+        if (std::abs(delta) > timeThreshold) {
+            std::cout << "  [FLAG] " << name << ": nominal=" << nomTime << "s, actual=" << actTime
+                      << "s, delta=" << delta << "s (exceeds " << timeThreshold << "s threshold)" << std::endl;
+        } else {
+            std::cout << "  " << name << ": nominal=" << nomTime << "s, actual=" << actTime
+                      << "s, delta=" << delta << "s (within threshold)" << std::endl;
+        }
+    };
+
+    checkEvent("Stage separation", nominal.stageSeparationTime, actual.stageSeparationTime);
+    checkEvent("Burnout", nominal.burnoutTime, actual.burnoutTime);
+    checkEvent("Orbital insertion", nominal.orbitalInsertionTime, actual.orbitalInsertionTime);
 }
 
 }
