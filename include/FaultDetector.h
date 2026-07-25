@@ -116,6 +116,47 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedIspFault(const Vehicl
     return trajectory;
 }
 
+// Thrust degradation fault: engine loses raw thrust mid-flight, only once
+// the vehicle reaches faultStartTime AND is burning on stageIndex. Same
+// dual-run pattern as the Isp fault above.
+inline std::vector<TelemetryPoint> runSimulationWithDelayedThrustFault(const VehicleConfig& cfg, int stageIndex,
+                                                                  double percentReduction, double faultStartTime,
+                                                                  double dt = 0.1, double maxTime = 1000.0) {
+    std::vector<TelemetryPoint> trajectory;
+    AtmosphereModel atmo;
+    Vehicle rocket(cfg.stages, cfg.payloadMass, cfg.bodyDiameter, cfg.fairingDiameter, cfg.noseLength,
+                   cfg.finCount, cfg.finSpan, cfg.finRootChord, cfg.finTipChord, cfg.finSweepDistance, cfg.finPosition,
+                   cfg.totalLength);
+
+    double simTime = 0.0;
+    bool faultApplied = false;
+
+    while (simTime < maxTime) {
+        if (!faultApplied && simTime >= faultStartTime && rocket.getCurrentStageIndex() == stageIndex) {
+            rocket.applyThrustMultiplier(stageIndex, 1.0 - percentReduction);
+            faultApplied = true;
+        }
+
+        AirProperties props = atmo.calculateState(rocket.getAltitude());
+        rocket.update(dt, props.density, props.speedOfSound, simTime);
+        simTime += dt;
+
+        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase(), rocket.getCurrentStageIndex()});
+
+        bool onFinalStage = (rocket.getCurrentStageIndex() == rocket.getTotalStages() - 1);
+        if (onFinalStage) {
+            bool reachedOrbit = rocket.hasEscapedGravity(0.0, 0.0, rocket.getVelocity(), rocket.getAltitude())
+                              || rocket.getVelocity() >= rocket.getOrbitalVelocity(rocket.getAltitude());
+            if (reachedOrbit) break;
+        }
+
+        if (rocket.getAltitude() <= 0.0 && rocket.getPhase() == FlightPhase::DESCENT) break;
+        if (rocket.getPhase() == FlightPhase::LANDED) break;
+    }
+
+    return trajectory;
+}
+
 // Failed-separation fault: stage separation is delayed by extraSeconds once
 // faultStartTime is reached. No config-copy injector needed since the delay
 // is a runtime Vehicle member, not a Stage/VehicleConfig field — we mutate

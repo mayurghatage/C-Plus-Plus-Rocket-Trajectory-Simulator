@@ -89,14 +89,15 @@ int main(int argc, char* argv[]) {
     std::cout << "  1. Isp degradation" << std::endl;
     std::cout << "  2. Stage separation delay" << std::endl;
     std::cout << "  3. Sensor fault (telemetry lies, vehicle is fine)" << std::endl;
-    std::cout << "Enter choice (1-3): ";
+    std::cout << "  4. Thrust degradation" << std::endl;
+    std::cout << "Enter choice (1-4): ";
     std::cin >> faultChoice;
 
     int stageIndex = 0;
     int sensorSubtype = 0;
 
-    if (faultChoice == 1) {
-        std::cout << "Enter Isp reduction percent (e.g. 0.10 for 10%): ";
+    if (faultChoice == 1 || faultChoice == 4) {
+        std::cout << "Enter " << (faultChoice == 1 ? "Isp" : "thrust") << " reduction percent (e.g. 0.10 for 10%): ";
         std::cin >> severity;
         std::cout << "Enter stage index to target (0 to " << cfg.stages.size() - 1 << "): ";
         std::cin >> stageIndex;
@@ -114,7 +115,7 @@ int main(int argc, char* argv[]) {
         std::cin >> severity;
     }
 
-    if (faultChoice == 1 && (stageIndex < 0 || stageIndex >= static_cast<int>(cfg.stages.size()))) {
+    if ((faultChoice == 1 || faultChoice == 4) && (stageIndex < 0 || stageIndex >= static_cast<int>(cfg.stages.size()))) {
         std::cout << "Invalid stage index. Skipping fault test." << std::endl;
         faultChoice = 0;
     }
@@ -122,12 +123,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
     std::cin >> faultStartTime;
 
-    if (faultChoice != 1 && faultChoice != 2 && faultChoice != 3) {
+    if (faultChoice != 1 && faultChoice != 2 && faultChoice != 3 && faultChoice != 4) {
         std::cout << "Invalid fault choice. Skipping fault injection test." << std::endl;
         faultChoice = 0;
     }
-    if (faultChoice == 1 && (severity <= 0.0 || severity >= 1.0)) {
-        std::cout << "Invalid Isp reduction percent (must be between 0 and 1). Skipping fault test." << std::endl;
+    if ((faultChoice == 1 || faultChoice == 4) && (severity <= 0.0 || severity >= 1.0)) {
+        std::cout << "Invalid reduction percent (must be between 0 and 1). Skipping fault test." << std::endl;
         faultChoice = 0;
     }
     if (faultChoice == 2 && severity <= 0.0) {
@@ -165,6 +166,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Vehicle is flying nominally. Only telemetry is corrupted." << std::endl;
         RTS::checkSensorConsistency(corruptedTrajectory);
         std::cout << "--- END SENSOR FAULT TEST ---\n" << std::endl;
+    } else if (faultChoice == 4) {
+        std::vector<RTS::TelemetryPoint> thrustFaultTrajectory =
+            RTS::runSimulationWithDelayedThrustFault(cfg, stageIndex, severity, faultStartTime);
+        runFaultTest("THRUST FAULT DETECTION TEST", cfg, nominalTrajectory, thrustFaultTrajectory);
+        RTS::compareMissionEvents(RTS::extractMissionEvents(nominalTrajectory),
+                                   RTS::extractMissionEvents(thrustFaultTrajectory));
     }
 
     double dt = 0.1;
