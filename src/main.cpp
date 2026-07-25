@@ -259,8 +259,13 @@ int main(int argc, char* argv[]) {
     std::cout << " Max Altitude    : " << maxAltitude    << " m"                      << std::endl;
     std::cout << " Max Velocity    : " << maxVelocity    << " m/s"                    << std::endl;
     std::cout << " Max-Q           : " << maxQ           << " Pa"                     << std::endl;
-    std::cout << " Burnout Time    : " << burnoutTime    << " s"                      << std::endl;
-    std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                     << std::endl;
+    if (burnoutTime > 0.0) {
+        std::cout << " Burnout Time    : " << burnoutTime    << " s"                  << std::endl;
+        std::cout << " Burnout Altitude: " << burnoutAltitude << " m"                 << std::endl;
+    } else {
+        std::cout << " Burnout Time    : N/A (reached orbit while still burning)"     << std::endl;
+        std::cout << " Burnout Altitude: N/A"                                         << std::endl;
+    }
     std::cout << " Impact Velocity : " << landingVelocity << " m/s"                   << std::endl;
     std::cout << " Landing Status  : " << landingStatus                               << std::endl;
     std::cout << " Total Flight    : " << simTime        << " s"                      << std::endl;
