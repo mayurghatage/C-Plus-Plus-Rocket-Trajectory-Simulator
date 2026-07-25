@@ -261,6 +261,9 @@ inline MissionEvents extractMissionEvents(const std::vector<TelemetryPoint>& tra
         if (events.burnoutTime < 0.0 && pt.phase == FlightPhase::BURNOUT) {
             events.burnoutTime = pt.time;
         }
+        if (events.stageSeparationTime < 0.0 && i > 0 && pt.stageIndex > trajectory[i-1].stageIndex) {
+            events.stageSeparationTime = pt.time;
+        }
     }
     if (!trajectory.empty()) {
         const auto& last = trajectory.back();
