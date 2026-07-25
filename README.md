@@ -122,6 +122,7 @@ Being transparent about what a physical model is versus a placeholder:
 
 - **PSLV is modeled as 2 stages** as a simplification; the real vehicle is 4-stage (solid-liquid-solid-liquid).
 - Post-orbital-insertion trajectory tracking for upper stages on reusable vehicles (e.g., Falcon 9 stage 2) can currently mislabel an escaping trajectory as "descent" - a fix analogous to the expendable-vehicle mission-end logic is planned.
+- Sensor fault currently only corrupts the altitude telemetry channel; velocity/mass channel corruption is a possible future extension.
 
 ---
 
@@ -130,7 +131,7 @@ Being transparent about what a physical model is versus a placeholder:
 ASTRA is built in layers, each meant to differentiate it further from existing simulators:
 
 - ✅ **Layer 1 — Barrowman Stability Analysis** (this build): CP/CG/stability margin, multi-stage dynamics, real atmosphere and gravity models
-- ✅ **Layer 2 — Fault Detection**: ASTRA can simulate a nominal trajectory alongside a faulty one to detect anomalies. Supported faults: Isp degradation and delayed stage separation. Each run compares nominal vs. faulty telemetry and reports percentage deviation in altitude and velocity per timestep.
+- ✅ **Layer 2 — Fault Detection**: ASTRA runs a nominal trajectory alongside a faulty one and detects anomalies two ways: pointwise telemetry deviation (altitude/velocity % difference per timestep) and mission-event timing (burnout, stage separation, orbital insertion delta). Four fault types supported: Isp degradation, delayed stage separation, thrust degradation, and sensor fault (telemetry corruption while the vehicle itself stays nominal — models the real avionics problem of distinguishing "did the rocket break" from "did our knowledge of the rocket break"). Sensor fault includes a self-diagnosing consistency check that needs no nominal reference run at all.
 - 🔜 **Layer 3 — Inverse Design Optimiser**: given a target altitude, ASTRA solves backwards for the vehicle parameters needed to reach it
 
 Beyond the three core layers: a Python-rich-based terminal UI, STK integration for orbital analysis (Phase 2), and a companion 6-DOF attitude dynamics/control simulator are planned.
@@ -139,8 +140,8 @@ Beyond the three core layers: a Python-rich-based terminal UI, STK integration f
 
 ## Interactive Fault Testing
 After the nominal run, the program prompts for:
-1. Fault type (1 = Isp degradation, 2 = stage separation delay)
-2. Severity (percent reduction for Isp, extra seconds for separation)
+1. Fault type (1 = Isp degradation, 2 = stage separation delay, 3 = sensor fault, 4 = thrust degradation)
+2. Fault-specific parameters (severity/magnitude, target stage, sensor subtype where applicable)
 3. Fault start time (seconds)
 
 Invalid inputs are rejected with a warning, and the fault test is skipped safely.
