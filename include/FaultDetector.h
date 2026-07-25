@@ -17,6 +17,7 @@ struct TelemetryPoint {
     double velocity;
     double mass;
     FlightPhase phase;
+    int stageIndex;
 };
 
 struct MissionEvents {
@@ -59,7 +60,7 @@ inline std::vector<TelemetryPoint> runSimulation(const VehicleConfig& cfg, doubl
         rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
-        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase()});
+        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase(), rocket.getCurrentStageIndex()});
 
         bool onFinalStage = (rocket.getCurrentStageIndex() == rocket.getTotalStages() - 1);
         if (onFinalStage) {
@@ -99,7 +100,7 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedIspFault(const Vehicl
         rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
-        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase()});
+        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase(), rocket.getCurrentStageIndex()});
 
         bool onFinalStage = (rocket.getCurrentStageIndex() == rocket.getTotalStages() - 1);
         if (onFinalStage) {
@@ -141,7 +142,7 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedSeparationFault(const
         rocket.update(dt, props.density, props.speedOfSound, simTime);
         simTime += dt;
 
-        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase()});
+        trajectory.push_back({simTime, rocket.getAltitude(), rocket.getVelocity(), rocket.getMass(), rocket.getPhase(), rocket.getCurrentStageIndex()});
 
         bool onFinalStage = (rocket.getCurrentStageIndex() == rocket.getTotalStages() - 1);
         if (onFinalStage) {
