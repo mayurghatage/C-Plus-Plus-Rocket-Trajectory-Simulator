@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <cstdlib>
 #include "Vehicle.h"
 #include "Atmosphere.h"
 #include "ConfigLoader.h"
@@ -23,6 +24,8 @@ struct MissionEvents {
     double burnoutTime = -1.0;
     double orbitalInsertionTime = -1.0;
 };
+
+enum class SensorFaultType { FREEZE, BIAS_DRIFT, NOISE };
 
 // Returns a copy of cfg with one stage's thrust reduced by percentReduction
 // (e.g. 0.10 = 10% thrust loss). Used to simulate an engine underperforming,
@@ -152,6 +155,71 @@ inline std::vector<TelemetryPoint> runSimulationWithDelayedSeparationFault(const
     }
 
     return trajectory;
+}
+
+// Sensor fault injector: corrupts the ALTITUDE channel of an already-computed
+// trajectory. Physics stays untouched — this simulates a sensor lying about
+// what's really happening, not the vehicle actually malfunctioning.
+inline std::vector<TelemetryPoint> injectSensorFault(const std::vector<TelemetryPoint>& trueTrajectory,
+                                                      SensorFaultType faultType,
+                                                      double faultStartTime,
+                                                      double magnitude) {
+    std::vector<TelemetryPoint> corrupted = trueTrajectory;
+    double frozenAltitude = 0.0;
+    bool frozenValueSet = false;
+
+    for (auto& pt : corrupted) {
+        if (pt.time < faultStartTime) continue;
+        double elapsed = pt.time - faultStartTime;
+
+        switch (faultType) {
+            case SensorFaultType::FREEZE:
+                if (!frozenValueSet) { frozenAltitude = pt.altitude; frozenValueSet = true; }
+                pt.altitude = frozenAltitude;
+                break;
+            case SensorFaultType::BIAS_DRIFT:
+                pt.altitude *= (1.0 + magnitude * elapsed);
+                break;
+            case SensorFaultType::NOISE:
+                double noise = ((std::rand() % 2000) - 1000) / 1000.0 * magnitude * pt.altitude;
+                pt.altitude += noise;
+                break;
+        }
+    }
+    return corrupted;
+}
+
+// Self-consistency check: differentiates the (possibly corrupted) altitude
+// channel to estimate velocity, then compares that against the reported
+// velocity channel. No nominal-run reference needed — this is the redundant-
+// sensor cross-check real avionics uses to catch a lying sensor on its own.
+inline void checkSensorConsistency(const std::vector<TelemetryPoint>& reportedTrajectory,
+                                    double deviationThreshold = 0.10) {
+    std::cout << "\n[SENSOR CONSISTENCY CHECK]" << std::endl;
+    int flagCount = 0;
+
+    for (size_t i = 1; i < reportedTrajectory.size(); ++i) {
+        double dt = reportedTrajectory[i].time - reportedTrajectory[i-1].time;
+        if (dt <= 0.0) continue;
+
+        double estimatedVelocity = (reportedTrajectory[i].altitude - reportedTrajectory[i-1].altitude) / dt;
+        double reportedVelocity = reportedTrajectory[i].velocity;
+
+        double deviation = (reportedVelocity != 0.0)
+            ? std::abs(estimatedVelocity - reportedVelocity) / std::abs(reportedVelocity)
+            : 0.0;
+
+        if (deviation > deviationThreshold) {
+            std::cout << "  [FLAG] t=" << reportedTrajectory[i].time
+                      << "s | altitude-derived velocity=" << estimatedVelocity
+                      << " m/s | reported velocity=" << reportedVelocity
+                      << " m/s | deviation=" << (deviation * 100.0) << "%" << std::endl;
+            flagCount++;
+        }
+    }
+
+    std::cout << "\n[SENSOR CONSISTENCY SUMMARY] " << flagCount
+              << " inconsistent timesteps detected." << std::endl;
 }
 
 inline void compareTrajectories(const std::vector<TelemetryPoint>& nominal,

@@ -88,31 +88,41 @@ int main(int argc, char* argv[]) {
     std::cout << "Select fault type:" << std::endl;
     std::cout << "  1. Isp degradation" << std::endl;
     std::cout << "  2. Stage separation delay" << std::endl;
-    std::cout << "Enter choice (1-2): ";
+    std::cout << "  3. Sensor fault (telemetry lies, vehicle is fine)" << std::endl;
+    std::cout << "Enter choice (1-3): ";
     std::cin >> faultChoice;
+
+    int stageIndex = 0;
+    int sensorSubtype = 0;
 
     if (faultChoice == 1) {
         std::cout << "Enter Isp reduction percent (e.g. 0.10 for 10%): ";
         std::cin >> severity;
+        std::cout << "Enter stage index to target (0 to " << cfg.stages.size() - 1 << "): ";
+        std::cin >> stageIndex;
     } else if (faultChoice == 2) {
         std::cout << "Enter extra separation delay in seconds (e.g. 5.0): ";
         std::cin >> severity;
+    } else if (faultChoice == 3) {
+        std::cout << "Select sensor fault subtype:" << std::endl;
+        std::cout << "  1. Freeze" << std::endl;
+        std::cout << "  2. Bias drift" << std::endl;
+        std::cout << "  3. Noise" << std::endl;
+        std::cout << "Enter choice (1-3): ";
+        std::cin >> sensorSubtype;
+        std::cout << "Enter fault magnitude (e.g. 0.02 for 2%/s drift or noise scale): ";
+        std::cin >> severity;
     }
 
-    int stageIndex = 0;
-    if (faultChoice == 1 || faultChoice == 3) {
-        std::cout << "Enter stage index to target (0 to " << cfg.stages.size() - 1 << "): ";
-        std::cin >> stageIndex;
-        if (stageIndex < 0 || stageIndex >= static_cast<int>(cfg.stages.size())) {
-            std::cout << "Invalid stage index. Skipping fault test." << std::endl;
-            faultChoice = 0;
-        }
+    if (faultChoice == 1 && (stageIndex < 0 || stageIndex >= static_cast<int>(cfg.stages.size()))) {
+        std::cout << "Invalid stage index. Skipping fault test." << std::endl;
+        faultChoice = 0;
     }
 
     std::cout << "Enter fault start time in seconds (e.g. 60.0): ";
     std::cin >> faultStartTime;
 
-    if (faultChoice != 1 && faultChoice != 2) {
+    if (faultChoice != 1 && faultChoice != 2 && faultChoice != 3) {
         std::cout << "Invalid fault choice. Skipping fault injection test." << std::endl;
         faultChoice = 0;
     }
@@ -122,6 +132,10 @@ int main(int argc, char* argv[]) {
     }
     if (faultChoice == 2 && severity <= 0.0) {
         std::cout << "Invalid separation delay (must be positive). Skipping fault test." << std::endl;
+        faultChoice = 0;
+    }
+    if (faultChoice == 3 && (sensorSubtype < 1 || sensorSubtype > 3)) {
+        std::cout << "Invalid sensor subtype. Skipping fault test." << std::endl;
         faultChoice = 0;
     }
     if (faultStartTime < 0.0) {
@@ -141,6 +155,16 @@ int main(int argc, char* argv[]) {
         runFaultTest("SEPARATION FAULT DETECTION TEST", cfg, nominalTrajectory, separationFaultTrajectory);
         RTS::compareMissionEvents(RTS::extractMissionEvents(nominalTrajectory),
                                    RTS::extractMissionEvents(separationFaultTrajectory));
+    } else if (faultChoice == 3) {
+        RTS::SensorFaultType sensorType = (sensorSubtype == 1) ? RTS::SensorFaultType::FREEZE
+                                         : (sensorSubtype == 2) ? RTS::SensorFaultType::BIAS_DRIFT
+                                                                 : RTS::SensorFaultType::NOISE;
+        std::vector<RTS::TelemetryPoint> corruptedTrajectory =
+            RTS::injectSensorFault(nominalTrajectory, sensorType, faultStartTime, severity);
+        std::cout << "\n--- SENSOR FAULT TEST ---" << std::endl;
+        std::cout << "Vehicle is flying nominally. Only telemetry is corrupted." << std::endl;
+        RTS::checkSensorConsistency(corruptedTrajectory);
+        std::cout << "--- END SENSOR FAULT TEST ---\n" << std::endl;
     }
 
     double dt = 0.1;
