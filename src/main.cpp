@@ -6,6 +6,7 @@
 #include "ConfigLoader.h"
 #include "Aerodynamics.h"
 #include "FaultDetector.h"
+#include "InverseOptimizer.h"
 
 std::string phaseToString(RTS::FlightPhase phase) {
     switch (phase) {
