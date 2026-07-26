@@ -36,6 +36,21 @@ inline double optimizePropellantMass(VehicleConfig cfg, int stageIndex, double t
     double lowMass = cfg.stages[stageIndex].propellantMass * 0.5;
     double highMass = cfg.stages[stageIndex].propellantMass * 2.0;
 
+    // Validate the bracket before searching: if the upper bound itself never
+    // reaches orbit (e.g. too much mass slows climb past the sim timeout),
+    // bisection has no valid solution inside this range and will converge
+    // on garbage. Warn rather than silently returning a bad answer.
+    {
+        VehicleConfig testCfg = cfg;
+        testCfg.stages[stageIndex].propellantMass = highMass;
+        auto testTrajectory = runSimulation(testCfg);
+        if (getOrbitalInsertionAltitude(testTrajectory) < 0.0) {
+            std::cout << "[WARNING] Upper bound propellantMass=" << highMass
+                      << " kg does not reach orbit within sim time. "
+                      << "Target may be unreachable with this search range." << std::endl;
+        }
+    }
+
     for (int iter = 0; iter < maxIterations; ++iter) {
         double midMass = (lowMass + highMass) / 2.0;
         cfg.stages[stageIndex].propellantMass = midMass;
