@@ -81,6 +81,27 @@ int main(int argc, char* argv[]) {
     
     std::vector<RTS::TelemetryPoint> nominalTrajectory = RTS::runSimulation(cfg);
 
+    std::cout << "\n--- INVERSE DESIGN OPTIMIZER TEST ---" << std::endl;
+    std::cout << "Run inverse optimizer? (1 = yes, 0 = skip): ";
+    int runOptimizer = 0;
+    std::cin >> runOptimizer;
+
+    if (runOptimizer == 1) {
+        double targetApogee;
+        int optStageIndex;
+        std::cout << "Enter target apogee in meters (e.g. 500000): ";
+        std::cin >> targetApogee;
+        std::cout << "Enter stage index to optimize propellant for (0 to " << cfg.stages.size() - 1 << "): ";
+        std::cin >> optStageIndex;
+
+        if (optStageIndex < 0 || optStageIndex >= static_cast<int>(cfg.stages.size())) {
+            std::cout << "Invalid stage index. Skipping optimizer test." << std::endl;
+        } else {
+            RTS::optimizePropellantMass(cfg, optStageIndex, targetApogee);
+        }
+    }
+    std::cout << "--- END INVERSE DESIGN OPTIMIZER TEST ---\n" << std::endl;
+
     int faultChoice = 0;
     double severity = 0.0;
     double faultStartTime = 0.0;
