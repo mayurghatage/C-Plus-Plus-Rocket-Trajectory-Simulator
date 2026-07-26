@@ -107,4 +107,64 @@ inline double optimizePropellantMass(VehicleConfig cfg, int stageIndex, double t
     return (lowMass + highMass) / 2.0;
 }
 
+// Binary search on thrust of the final stage to hit a target orbital
+// insertion altitude, holding propellant mass fixed. More thrust means
+// faster acceleration and reaching orbital velocity sooner — but it also
+// increases mass flow rate (massFlowRate = thrust / (Isp * g0)), burning
+// fuel faster. Net effect on insertion altitude is monotonic increasing
+// for typical thrust ranges (faster climb dominates faster fuel burn),
+// same bisection logic as propellant mass optimization above.
+inline double optimizeThrust(VehicleConfig cfg, int stageIndex, double targetAltitude,
+                              double toleranceMeters = 1000.0, int maxIterations = 20) {
+    double lowThrust = cfg.stages[stageIndex].thrust * 0.5;
+    double highThrust = cfg.stages[stageIndex].thrust * 2.0;
+
+    {
+        VehicleConfig testCfg = cfg;
+        testCfg.stages[stageIndex].thrust = highThrust;
+        auto testTrajectory = runSimulation(testCfg);
+        if (getOrbitalInsertionAltitude(testTrajectory) < 0.0) {
+            std::cout << "[WARNING] Upper bound thrust=" << highThrust
+                      << " N does not reach orbit within sim time. "
+                      << "Target may be unreachable with this search range." << std::endl;
+        }
+    }
+
+    for (int iter = 0; iter < maxIterations; ++iter) {
+        double midThrust = (lowThrust + highThrust) / 2.0;
+        cfg.stages[stageIndex].thrust = midThrust;
+
+        auto trajectory = runSimulation(cfg);
+        double insertionAlt = getOrbitalInsertionAltitude(trajectory);
+
+        if (insertionAlt < 0.0) {
+            std::cout << "[ITER " << iter << "] thrust=" << midThrust
+                      << " N -> did not reach orbital velocity" << std::endl;
+            lowThrust = midThrust;
+            continue;
+        }
+
+        double error = insertionAlt - targetAltitude;
+        std::cout << "[ITER " << iter << "] thrust=" << midThrust
+                  << " N -> insertion altitude=" << insertionAlt << " m (target=" << targetAltitude
+                  << " m, error=" << error << " m)" << std::endl;
+
+        if (std::abs(error) <= toleranceMeters) {
+            std::cout << "\n[CONVERGED] thrust=" << midThrust << " N gives insertion altitude="
+                      << insertionAlt << " m (within " << toleranceMeters << " m of target)" << std::endl;
+            return midThrust;
+        }
+
+        if (insertionAlt < targetAltitude) {
+            lowThrust = midThrust;
+        } else {
+            highThrust = midThrust;
+        }
+    }
+
+    std::cout << "\n[NOT CONVERGED] Max iterations reached. Best guess: "
+              << ((lowThrust + highThrust) / 2.0) << " N" << std::endl;
+    return (lowThrust + highThrust) / 2.0;
+}
+
 }

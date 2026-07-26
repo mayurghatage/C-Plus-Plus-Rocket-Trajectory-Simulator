@@ -89,15 +89,27 @@ int main(int argc, char* argv[]) {
     if (runOptimizer == 1) {
         double targetApogee;
         int optStageIndex;
-        std::cout << "Enter target apogee in meters (e.g. 500000): ";
+        int paramChoice;
+
+        std::cout << "Optimize which parameter?" << std::endl;
+        std::cout << "  1. Propellant mass" << std::endl;
+        std::cout << "  2. Thrust" << std::endl;
+        std::cout << "Enter choice (1-2): ";
+        std::cin >> paramChoice;
+
+        std::cout << "Enter target insertion altitude in meters (e.g. 500000): ";
         std::cin >> targetApogee;
-        std::cout << "Enter stage index to optimize propellant for (0 to " << cfg.stages.size() - 1 << "): ";
+        std::cout << "Enter stage index to optimize (0 to " << cfg.stages.size() - 1 << "): ";
         std::cin >> optStageIndex;
 
         if (optStageIndex < 0 || optStageIndex >= static_cast<int>(cfg.stages.size())) {
             std::cout << "Invalid stage index. Skipping optimizer test." << std::endl;
-        } else {
+        } else if (paramChoice == 1) {
             RTS::optimizePropellantMass(cfg, optStageIndex, targetApogee);
+        } else if (paramChoice == 2) {
+            RTS::optimizeThrust(cfg, optStageIndex, targetApogee);
+        } else {
+            std::cout << "Invalid parameter choice. Skipping optimizer test." << std::endl;
         }
     }
     std::cout << "--- END INVERSE DESIGN OPTIMIZER TEST ---\n" << std::endl;
