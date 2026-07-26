@@ -75,6 +75,23 @@ inline double optimizePropellantMass(VehicleConfig cfg, int stageIndex, double t
         if (std::abs(error) <= toleranceMeters) {
             std::cout << "\n[CONVERGED] propellantMass=" << midMass << " kg gives insertion altitude="
                       << insertionAlt << " m (within " << toleranceMeters << " m of target)" << std::endl;
+
+            // Sensitivity check: real aerospace practice — after finding a nominal
+            // design point, check how much a small manufacturing/loading tolerance
+            // (±5%) shifts the outcome. High sensitivity flags a fragile design.
+            VehicleConfig lowSensCfg = cfg;
+            lowSensCfg.stages[stageIndex].propellantMass = midMass * 0.95;
+            double lowSensAlt = getOrbitalInsertionAltitude(runSimulation(lowSensCfg));
+
+            VehicleConfig highSensCfg = cfg;
+            highSensCfg.stages[stageIndex].propellantMass = midMass * 1.05;
+            double highSensAlt = getOrbitalInsertionAltitude(runSimulation(highSensCfg));
+
+            std::cout << "[SENSITIVITY] -5% propellant (" << (midMass * 0.95) << " kg) -> "
+                      << (lowSensAlt < 0.0 ? "did not reach orbit" : std::to_string(lowSensAlt) + " m") << std::endl;
+            std::cout << "[SENSITIVITY] +5% propellant (" << (midMass * 1.05) << " kg) -> "
+                      << (highSensAlt < 0.0 ? "did not reach orbit" : std::to_string(highSensAlt) + " m") << std::endl;
+
             return midMass;
         }
 
