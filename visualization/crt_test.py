@@ -12,14 +12,23 @@ ctx.viewport = (0, 0, size[0], size[1])
 font_label = pygame.font.SysFont("Consolas", 20)
 font_value = pygame.font.SysFont("Consolas", 64, bold=True)
 
-# build one panel surface with both texts
+# exact color sampled from reference (bright core -> edge falloff)
+BAR_COLOR = (180, 220, 80)
+
 panel = pygame.Surface(size, pygame.SRCALPHA)
 
 label_surf = font_label.render("MISSION PARAMETERS", True, (150, 255, 150))
 value_surf = font_value.render("ASTRA ONLINE", True, (255, 255, 255))
-
 panel.blit(label_surf, (100, 100))
 panel.blit(value_surf, (100, 130))
+
+# small label box (like "PROJECTED MORTALITY:" in the reference) - border only
+label_box = pygame.Rect(size[0]//2 - 220, size[1]//2 - 110, 440, 60)
+pygame.draw.rect(panel, BAR_COLOR, label_box, width=2, border_radius=4)
+
+# main bar (like "ABSOLUTE" bar) - border only, no fill, no text, for now
+main_box = pygame.Rect(size[0]//2 - 350, size[1]//2 - 20, 700, 90)
+pygame.draw.rect(panel, BAR_COLOR, main_box, width=3, border_radius=6)
 
 text_data = pygame.image.tostring(panel, "RGBA", True)
 text_texture = ctx.texture(panel.get_size(), 4, text_data)
@@ -62,13 +71,9 @@ void main() {
         return;
     }
 
-    // calm dark background, just a hint of green, no grid, no bright lines
     float baseTint = 0.095;
     float noise = hash(bp * 500.0 + time * 0.3) * 0.006;
-
-    // static scanlines (texture only, not moving)
     float scan = sin(bp.y * 800.0) * 0.015;
-
     float vign = 1.0 - dot(bp - 0.5, bp - 0.5) * 0.9;
 
     float green = (baseTint + scan + noise) * vign;
