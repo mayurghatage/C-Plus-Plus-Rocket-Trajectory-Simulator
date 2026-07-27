@@ -9,11 +9,20 @@ pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.NOFRAME)
 ctx = moderngl.create_context()
 ctx.viewport = (0, 0, size[0], size[1])
 
-font = pygame.font.SysFont("Consolas", 48)
-text_surface = font.render("ASTRA ONLINE", True, (255, 255, 255))
-text_data = pygame.image.tostring(text_surface, "RGBA", True)
+font_label = pygame.font.SysFont("Consolas", 20)
+font_value = pygame.font.SysFont("Consolas", 64, bold=True)
 
-text_texture = ctx.texture(text_surface.get_size(), 4, text_data)
+# build one panel surface with both texts
+panel = pygame.Surface(size, pygame.SRCALPHA)
+
+label_surf = font_label.render("MISSION PARAMETERS", True, (150, 255, 150))
+value_surf = font_value.render("ASTRA ONLINE", True, (255, 255, 255))
+
+panel.blit(label_surf, (100, 100))
+panel.blit(value_surf, (100, 130))
+
+text_data = pygame.image.tostring(panel, "RGBA", True)
+text_texture = ctx.texture(panel.get_size(), 4, text_data)
 text_texture.filter = (moderngl.LINEAR, moderngl.LINEAR)
 
 vertex_shader = '''
