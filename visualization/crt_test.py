@@ -5,7 +5,7 @@ import numpy as np
 pygame.init()
 info = pygame.display.Info()
 size = (info.current_w, info.current_h)
-pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.NOFRAME)
 ctx = moderngl.create_context()
 ctx.viewport = (0, 0, size[0], size[1])
 
