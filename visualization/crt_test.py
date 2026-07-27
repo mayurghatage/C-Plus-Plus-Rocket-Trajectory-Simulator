@@ -9,6 +9,13 @@ pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.NOFRAME)
 ctx = moderngl.create_context()
 ctx.viewport = (0, 0, size[0], size[1])
 
+font = pygame.font.SysFont("Consolas", 48)
+text_surface = font.render("ASTRA ONLINE", True, (255, 255, 255))
+text_data = pygame.image.tostring(text_surface, "RGBA", True)
+
+text_texture = ctx.texture(text_surface.get_size(), 4, text_data)
+text_texture.filter = (moderngl.LINEAR, moderngl.LINEAR)
+
 vertex_shader = '''
 #version 330
 in vec2 in_vert;
@@ -24,6 +31,7 @@ fragment_shader = '''
 in vec2 uv;
 out vec4 fragColor;
 uniform float time;
+uniform sampler2D textTex;
 
 vec2 barrel(vec2 p) {
     p = p * 2.0 - 1.0;
@@ -55,7 +63,8 @@ void main() {
     float vign = 1.0 - dot(bp - 0.5, bp - 0.5) * 0.9;
 
     float green = (baseTint + scan + noise) * vign;
-    fragColor = vec4(green * 0.15, green * 1.3, green * 0.5, 1.0);
+    vec4 textColor = texture(textTex, bp);
+    fragColor = vec4(green * 0.15, green * 1.3, green * 0.5, 1.0) + textColor * textColor.a;
 }
 '''
 
@@ -68,6 +77,9 @@ vao = ctx.simple_vertex_array(prog, vbo, 'in_vert', mode=moderngl.TRIANGLE_STRIP
 clock = pygame.time.Clock()
 t = 0.0
 running = True
+
+text_texture.use(location=0)
+prog['textTex'].value = 0
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
