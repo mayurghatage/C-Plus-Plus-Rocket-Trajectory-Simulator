@@ -1,20 +1,35 @@
 {
   "stages": [
-    {
-      "dryMass": 27000,
-      "propellantMass": 129000,
-      "thrust": 4846900,
-      "isp": 269,
-      "burnTime": 110
-    },
-    {
-      "dryMass": 3200,
-      "propellantMass": 9200,
-      "thrust": 800000,
-      "isp": 293,
-      "burnTime": 150
-    }
-  ],
+  {
+    "dryMass": 30200,
+    "propellantMass": 138200,
+    "thrust": 4846900,
+    "isp": 269,
+    "burnTime": 105
+  },
+  {
+    "dryMass": 3000,
+    "propellantMass": 42000,
+    "thrust": 799000,
+    "isp": 293,
+    "burnTime": 158
+  },
+  {
+    "dryMass": 2000,
+    "propellantMass": 7600,
+    "thrust": 250000,
+    "isp": 294,
+    "burnTime": 85
+  },
+  {
+    "dryMass": 900,
+    "propellantMass": 2500,
+    "thrust": 14600,
+    "isp": 308,
+    "burnTime": 525
+  }
+],
+
   "payloadMass": 3800,
   "vehicleType": "expendable",
   "totalLength": 44.0,
