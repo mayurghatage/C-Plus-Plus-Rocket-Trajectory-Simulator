@@ -132,7 +132,9 @@ ASTRA is built in layers, each meant to differentiate it further from existing s
 
 - ✅ **Layer 1 — Barrowman Stability Analysis** (this build): CP/CG/stability margin, multi-stage dynamics, real atmosphere and gravity models
 - ✅ **Layer 2 — Fault Detection**: ASTRA runs a nominal trajectory alongside a faulty one and detects anomalies two ways: pointwise telemetry deviation (altitude/velocity % difference per timestep) and mission-event timing (burnout, stage separation, orbital insertion delta). Four fault types supported: Isp degradation, delayed stage separation, thrust degradation, and sensor fault (telemetry corruption while the vehicle itself stays nominal — models the real avionics problem of distinguishing "did the rocket break" from "did our knowledge of the rocket break"). Sensor fault includes a self-diagnosing consistency check that needs no nominal reference run at all.
-- 🔜 **Layer 3 — Inverse Design Optimiser**: given a target altitude, ASTRA solves backwards for the vehicle parameters needed to reach it
+- ✅ **Layer 3 — Inverse Design Optimiser**: given a target orbital-insertion altitude, ASTRA solves backwards via bisection search for either the required propellant mass or thrust, using the full multi-stage vehicle to respect its actual pitch/gravity-turn program. Includes post-convergence sensitivity analysis (±5% parameter perturbation) to check the solution isn't fragile.
+
+Beyond the three core layers: a retro CRT-style terminal visualizer (Python, moderngl/pygame, GLSL shader for phosphor-green glow and screen curvature) for telemetry playback, STK integration for orbital analysis (Phase 2), and a companion 6-DOF attitude dynamics/control simulator are planned.
 
 Beyond the three core layers: a Python-rich-based terminal UI, STK integration for orbital analysis (Phase 2), and a companion 6-DOF attitude dynamics/control simulator are planned.
 
