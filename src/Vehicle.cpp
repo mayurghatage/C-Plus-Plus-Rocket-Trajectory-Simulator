@@ -19,7 +19,7 @@ namespace RTS {
     finTipChord(finTipChord), finSweepDistance(finSweepDistance), finPosition(finPosition),
     finCnAlpha(computeFinCnAlpha(finCount, finSpan, finRootChord, finTipChord, finSweepDistance, bodyDiameter)),
     noseAero(computeNoseAero(bodyDiameter)),
-    currentMass(this->stages[0].dryMass + this->stages[0].propellantMass + payloadMass),
+    currentMass([&]{ double m = payloadMass; for (auto& s : this->stages) m += s.dryMass + s.propellantMass; return m; }()),
     positionX(0.0), positionY(0.0), positionZ(0.0),
     velocityX(0.0), velocityY(0.0), velocityZ(0.0),
     currentPhase(FlightPhase::PRE_LAUNCH), impactVelocity(0.0),
@@ -140,7 +140,6 @@ namespace RTS {
                     currentPhase = FlightPhase::STAGE_SEPARATION;
                     currentMass -= stages[currentStageIndex].dryMass;
                     currentStageIndex++;
-                    currentMass += stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass;
                     currentPhase = FlightPhase::BOOST;
                     burnoutTime = -1.0;
                 }
