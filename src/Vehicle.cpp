@@ -118,9 +118,9 @@ namespace RTS {
         velocityZ += (dt/6.0)*(k1.dvz + 2*k2.dvz + 2*k3.dvz + k4.dvz);
         currentMass += (dt/6.0)*(k1.dMass + 2*k2.dMass + 2*k3.dMass + k4.dMass);
 
-        double massLost = (stages[currentStageIndex].dryMass + stages[currentStageIndex].propellantMass + payloadMass) - currentMass;
-        stages[currentStageIndex].propellantMass = std::max(0.0, stages[currentStageIndex].propellantMass - massLost);
-        if (currentMass < stages[currentStageIndex].dryMass + payloadMass) currentMass = stages[currentStageIndex].dryMass + payloadMass;
+        double massBurnedThisStep = -(dt/6.0)*(k1.dMass + 2*k2.dMass + 2*k3.dMass + k4.dMass);
+        stages[currentStageIndex].propellantMass -= massBurnedThisStep;
+        if (stages[currentStageIndex].propellantMass < 0.0) stages[currentStageIndex].propellantMass = 0.0;
 
         double speed = std::sqrt(velocityX*velocityX + velocityY*velocityY + velocityZ*velocityZ);
         double dynamicPressure = 0.5 * airDensity * speed * speed;
